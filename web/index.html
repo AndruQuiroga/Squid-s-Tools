@@ -3,9 +3,11 @@
   <head>
     <title>Hello, World!</title>
     <link rel="stylesheet" href="./css/styles.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
 </head>
 <body>
@@ -26,6 +28,10 @@
   </div>
 
   <div id="selected_encounter" class="selected_encounter">
+
+    <div class="openBtn">
+      <button class="openButton" onclick="openForm()"><strong>Open Form</strong></button>
+    </div>
 
     <div class="monster_block">
       <div><span class="monster_name">Ogre</span><span class="glyphicon glyphicon-trash red al-right"></span></div>
@@ -59,6 +65,61 @@
 
 
 
+<div class="loginPopup">
+  <div class="formPopup" id="popupForm">
+      <form class="formContainer">
+
+        <div>
+          <span>Monster Name: </span>
+          <span>
+            <select id="select-state" class="js-example-data-array" placeholder="Pick a state...">
+                    <option value="">Select a state...</option>
+            </select>
+          </span>
+          <span>
+            <button type="button" class="btn" onclick="printSelection()">Add</button>
+          </span>
+        </div>
+
+<!--  List Selected Monsters -->
+        <div class="stat_small">
+        <table id="Encounter-Builder-Table">
+
+        <colgroup>
+        <col span="1" style="width: 30%;">
+        <col span="1" style="width: 50%;">
+        <col span="1" style="width: 10%;">
+        <col span="1" style="width: 10%;">
+        <col span="1" style="width: 10%;">
+        </colgroup>
+
+        <tbody>
+        <tr>
+          <th>Creature Name</th>
+          <th>Weapons</th>
+          <th># Minions</th>
+          <th># Bosses</th>
+          <th>Generate Loot? (Items)</th>
+          <th></th>
+        </tr>
+
+        </tbody>
+
+        </table>
+        </div>
+        <div>
+          <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
+          <button type="button" class="btn cancel" onclick="sendForm()">Create</button>
+        </div>
+
+
+
+
+      </form>
+  </div>
+</div>
+
+
 </body>
 
 <script type="text/javascript">
@@ -73,8 +134,51 @@ $(document).ready(function(){
     document.getElementById("stat_block").innerHTML = html_block;
     // alert("The paragraph was clicked.");
   });
+
+  async function get_monster_list(){
+    await eel.get_monster_list()().then(function(result){
+      $('.js-example-data-array').select2(
+          {data: result}
+    );
+    });
+  }
+
+  get_monster_list()
+  $('.weapon-selection').select2({ width: '100%' });
+
+
+
 });
 </script>
+<script>
+
+    function openForm() {
+      document.getElementById("popupForm").style.display = "block";
+    }
+    function closeForm() {
+      document.getElementById("popupForm").style.display = "none";
+    }
+    function sendForm() {
+      document.getElementById("popupForm").style.display = "none";
+      console.log("TEST");
+      $('#Encounter-Builder-Table tr').each(function() {
+        console.log("IN LOOP");
+        let customerId = $(this).find(".weapon-selection").select2('data');
+        console.log(customerId);
+      });
+    }
+
+    async function printSelection() {
+      let jsarr = $('.js-example-data-array').select2('data');
+      await eel.add_monster_to_encounter_builder(jsarr)().then(function(result) {
+        $('#Encounter-Builder-Table > tbody:last-child').append(result)
+        $('.weapon-selection').select2({ width: '100%' });
+      });
+    }
+
+</script>
+
+<!--  ;-->
 
 <!--<script>-->
 <!--  $(document).ready(function(){-->

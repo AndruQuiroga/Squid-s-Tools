@@ -1,3 +1,5 @@
+import eel as eel
+import pandas as pd
 base_html_stat_block = f"""
 <!DOCTYPE html>
 <html>
@@ -11,6 +13,36 @@ end_html_stat_block = """
 </body>
 </html>
 """
+
+monster_df = pd.read_csv('./data/Bestiary_filtered.csv')
+
+
+@eel.expose
+def get_monster_list():
+    return [{"id": i, "text": x} for i, x in enumerate(monster_df['Name'])]
+
+
+# <tr>
+#           <td>MONSTER1</td>
+#           <td><select class="js-example-basic-multiple" name="states[]" multiple="multiple"></select></td>
+#           <td><select class="js-example-basic-single" placeholder="0"></select></td>
+#           <td><select class="js-example-basic-single" placeholder="0"></select></td>
+#           <td><input type="checkbox"></td>
+#           <td><button type="button" class="btn">Remove</button></td>
+#         </tr>
+@eel.expose
+def add_monster_to_encounter_builder(js_arr):
+    monster_name = js_arr[0]['text']
+    monster = monster_df[monster_df['Name'] == monster_name]
+    s = "<tr>"
+    s += f"<td>{monster['Name'].to_numpy()[0]}</td>"
+    s += f"<td><select class=\"weapon-selection\"multiple=\"multiple\"></select></td>"
+    s += f"<td><select class=\"js-example-basic-single\"></select></td>"
+    s += f"<td><select class=\"js-example-basic-single\"></select></td>"
+    s += "<td><input type=\"checkbox\"></td>"
+    s += "<td><button type=\"button\" class=\"btn\">Remove</button></td>"
+    s += "</tr>"
+    return s
 
 
 def token_block(i, token):
