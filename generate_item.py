@@ -2,7 +2,7 @@ import pandas as pd
 from tabulate import tabulate
 
 # load item csv
-items = pd.read_csv('items.csv')
+items = pd.read_csv('data/Items.csv')
 
 if __name__ == '__main__':
     # ask user for rarity with numbers
@@ -24,6 +24,10 @@ if __name__ == '__main__':
 
     while True:
         # ranoomly select an item
+        # ask user for d100
+        # if d100 is in the range of the item, print the item
+        # else, print a failure message
+        input('Roll a d100:')
         item = items.sample()
         for column in item.columns:
             print(f'{column}: {item[column].values[0]}')

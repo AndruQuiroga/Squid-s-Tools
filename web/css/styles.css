@@ -1,0 +1,116 @@
+
+.row {
+  display: flex;
+}
+
+.encounter_selection {
+    flex: 20%;
+    background-color: lightgray;
+    padding: 10px;
+    margin: 10px;
+
+    overflow-y:auto;
+    position:relative;
+}
+
+.encounter_block {
+    background-color: lightgray;
+    padding: 10px;
+    margin: 10px;
+}
+
+.selected_encounter {
+    flex: 20%;
+    height: 500px;
+    background-color: lightgray;
+    padding: 10px;
+    margin: 10px;
+    overflow-y:auto;
+    position:relative;
+}
+
+.monster_block {
+    background-color: antiquewhite;
+    flex: auto;
+    /*width: 80%;*/
+    height: 50px;
+    /*padding: 0px;*/
+    /*margin: 10px;*/
+    margin-top: 5px;
+    margin-bottom: 5px;
+    /*margin-left: 0px;*/
+}
+
+.stat_block {
+    flex: 60%;
+    padding: 10px;
+    background-color: lightgray;
+
+    overflow-y:auto;
+    position:relative;
+}
+
+.gradient {
+    background: linear-gradient(10deg, #A73335, white);
+    height:3px;
+    margin:-3px 0px 0px 0px;
+}
+.monster_name {
+    font-size:65%;
+    font-family:Georgia, serif;
+    font-variant:small-caps;
+    font-weight:bold;
+    color:#A73335;
+    margin-left: 5px;
+}
+
+.stat_small {
+    font-size:50%;
+    margin-left: 5px;
+    padding: 0px;
+}
+
+.description {
+    font-style:italic;    
+}
+.bold {
+    font-weight:bold;
+}
+.red {
+    color:#A73335;
+}
+table {
+    width:100%;
+    border:0px;
+    border-collapse:collapse;
+    color:#A73335;
+}
+th, td {
+    width:50px;
+    text-align:center;
+}
+.actions {
+    font-size:175%;
+    font-variant:small-caps;
+    margin:17px 0px 0px 0px;
+}
+.hr {
+    background: #A73335;
+    height:2px;
+}
+.attack {
+    margin:5px 0px;
+}
+.attackname {
+    font-weight:bold;
+    font-style:italic;
+}
+
+.glyphicon {
+       font-size: 8px;
+     }
+
+.al-right {
+    float: right;
+    margin: 5px;
+}

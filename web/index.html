@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello, World!</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body>
+
+<h1>Hello, World!</h1>
+
+<div class="row">
+  <div class="encounter_selection">
+    <div class="encounter_block">Test</div>
+    <div class="encounter_block">Test</div>
+    <div class="encounter_block">Test</div>
+    <div class="encounter_block">Test</div>
+    <div class="encounter_block">Test</div>
+    <div class="encounter_block">Test</div>
+    <div class="encounter_block">Test</div>
+
+
+  </div>
+
+  <div id="selected_encounter" class="selected_encounter">
+
+    <div class="monster_block">
+      <div><span class="monster_name">Ogre</span><span class="glyphicon glyphicon-trash red al-right"></span></div>
+      <div class="gradient"></div>
+
+      <div class="red stat_small">
+        <div><span class="bold red">Armor Class</span><span> 11 (hide armor)</span></div>
+        <div><span class="bold red">Hit Points</span><span> 59 (7d10+21)</span></div>
+        <div><span class="bold red">Speed</span><span> 40 ft.</span></div>
+      </div>
+    </div>
+
+    <div id="Monster1" class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+    <div class="monster_block">Test</div>
+  </div>
+
+  <div id="stat_block" class="stat_block">
+
+  </div>
+
+</div>
+
+
+
+</body>
+
+<script type="text/javascript">
+
+</script>
+
+<script>
+$(document).ready(function(){
+  $("#Monster1").click(async function(){
+    let html_block = await eel.get_stat_block()();
+    // $("#stat_block").html(html_block)
+    document.getElementById("stat_block").innerHTML = html_block;
+    // alert("The paragraph was clicked.");
+  });
+});
+</script>
+
+<!--<script>-->
+<!--  $(document).ready(function(){-->
+<!--  $("#selected_encounter").contextmenu(function(e){-->
+<!--    e.preventDefault();-->
+<!--    $("#contextMenu").css({display: "block", left:e.pageX, top:e.pageY});-->
+<!--  });-->
+<!--    $(document).click(function(){-->
+<!--        $("#contextMenu").hide();-->
+<!--    });-->
+<!--});-->
+<!--</script>-->

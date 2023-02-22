@@ -58,7 +58,7 @@ class Loot:
         return s
 
 
-ITEM_DATABASE = pd.read_csv('items.csv')
+ITEM_DATABASE = pd.read_csv('data/Items.csv')
 
 
 class LootRoller:

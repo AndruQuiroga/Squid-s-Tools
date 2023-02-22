@@ -52,7 +52,7 @@ for i in range(len(bins) - 1):
     print(f"{labels[i]:<10s} {bins[i]:3.0f}-{bins[i + 1]:<3.0f}: {counts[i]:0.0%}")
 
 
-items_csv = pd.read_csv("items.csv")
+items_csv = pd.read_csv("../data/Items.csv")
 mundane_items = items_csv[items_csv['Rarity'] == 'none']
 mundane_items = mundane_items[~mundane_items['Value'].isna()]
 
@@ -66,5 +66,5 @@ print(len(moneies), len(mundane_items))
 moneies = np.array(moneies)
 print(moneies.mean(), moneies.std())
 plt.show()
-plt.hist(moneies, bins=20, range=(0, 100))
+plt.hist(moneies, bins=20, range=(0, 10000))
 plt.show()

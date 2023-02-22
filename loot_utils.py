@@ -71,7 +71,7 @@ class LifeStyle(Enum):
     Aristocratic = 6
 
 # load monster database
-MONSTER_DB = pd.read_csv('Bestiary_filtered.csv')
+MONSTER_DB = pd.read_csv('data/Bestiary_filtered.csv')
 
 class Token:
 
