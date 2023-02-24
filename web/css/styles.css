@@ -1,36 +1,86 @@
 
+h1 {
+    /*font-family: fantasy;*/
+    font-size: 300%;
+    font-variant: small-caps;
+    /*font-weight: bold;*/
+    /*color: #A73335;*/
+    /*text-align: center;*/
+    margin: 0px;
+    padding: 0px 5px;
+}
+
+.editable {
+
+}
+
 .row {
   display: flex;
 }
 
+body {
+    background-color: #18122B;
+}
+
+.dark {
+    background-color: #1F1D36;
+    color: white;
+}
+
+.dark1{
+    background-color: #393053;
+    color: #393053;
+}
+
+.dark2{
+    background-color: #443C68;
+    color: #443C68;
+}
+
+.light {
+    /*background-color: #635985;*/
+    color: white;
+}
+
+.light1 {
+    /*background-color: #635985;*/
+    color: #B6EADA;
+}
+
 .encounter_selection {
-    flex: 20%;
-    background-color: lightgray;
-    padding: 10px;
-    margin: 10px;
+    flex: 10%;
+    height: 500px;
+    padding: 5px 5px;
+    margin: 5px 0px 5px -30px;
+    border-radius: 5px;
 
     overflow-y:auto;
     position:relative;
 }
 
 .encounter_block {
-    background-color: lightgray;
-    padding: 10px;
-    margin: 10px;
+    background-color: #635985;
+    border-radius: 5px;
+    color: white;
+    text-align: center;
+    padding: 10px 5px 10px 5px;
+    margin: 10px 5px;
 }
 
 .selected_encounter {
     flex: 20%;
     height: 500px;
-    background-color: lightgray;
-    padding: 10px;
-    margin: 10px;
+    background-color: #18122B;
+    padding: 5px 10px 0px 5px;
+    /*border-radius: 25px;*/
+    margin: 10px 0px 0px 0px;
     overflow-y:auto;
     position:relative;
 }
 
 .monster_block {
-    background-color: antiquewhite;
+    background-color: #635985;
+    border-radius: 5px;
     flex: auto;
     /*width: 80%;*/
     height: 50px;
@@ -44,14 +94,14 @@
 .stat_block {
     flex: 60%;
     padding: 10px;
-    background-color: lightgray;
+    background-color: #1F1D36;
 
     overflow-y:auto;
     position:relative;
 }
 
 .gradient {
-    background: linear-gradient(10deg, #A73335, white);
+    background: linear-gradient(10deg, #301E67, #5B8FB9);
     height:3px;
     margin:-3px 0px 0px 0px;
 }
@@ -60,7 +110,7 @@
     font-family:Georgia, serif;
     font-variant:small-caps;
     font-weight:bold;
-    color:#A73335;
+    /*color:#A73335;*/
     margin-left: 5px;
 }
 
@@ -165,7 +215,7 @@ background-color: #fff;
   border-bottom: 1px solid #ddd;
 }
 
-.js-example-basic-multiple {
+.weapon-selection {
     width: 100%;
 }
 

@@ -1,8 +1,48 @@
+import pickle
+import uuid
 from enum import Enum
 import pandas as pd
 import numpy as np
 
-from html_utils import create_html_stat_block
+
+# from html_utils import create_html_stat_block
+
+
+class Weapon:
+    WEAPON_DB = None
+
+    def __init__(self, name, damage, damage_type, weight, value, properties, description):
+        self.name = name
+        self.damage = damage
+        self.damage_type = damage_type
+        self.weight = weight
+        self.value = value
+        self.properties = properties
+        self.description = description
+
+    @staticmethod
+    def create_weapon_from_row(row):
+        properties = row['Properties'].split(',')
+        damage = properties[0]
+        damage_type = properties[1]
+        extra = ''
+        if '-' in row['Properties']:
+            extra = row['Properties'].split('-')[1]
+        return Weapon(row['Name'], damage, damage_type,
+                      row['Weight'], row['Value'], extra, row['Text'])
+
+    @classmethod
+    def get_all_weapons(cls):
+        if cls.WEAPON_DB is None:
+            df = pd.read_csv('./data/Items.csv')
+            df = df[['weapon' in str(x) for x in df['Type'].to_numpy()]]
+            weapons = [Weapon.create_weapon_from_row(row) for index, row in df.iterrows()]
+
+            cls.WEAPON_DB = weapons
+        return cls.WEAPON_DB
+
+    def __str__(self):
+        return f"{self.name} ({self.damage} {self.damage_type})"
 
 
 class Money:
@@ -60,6 +100,7 @@ class Money:
     def __repr__(self):
         return f"{self.platinum}pp {self.gold}gp {self.silver}sp {self.copper}cp"
 
+
 class LifeStyle(Enum):
     """Types of wealth"""
     Wretched = 0
@@ -70,12 +111,14 @@ class LifeStyle(Enum):
     Wealthy = 5
     Aristocratic = 6
 
+
 # load monster database
 MONSTER_DB = pd.read_csv('data/Bestiary_filtered.csv')
 
+
 class Token:
 
-    def __init__(self, token_name, boss=False, enemey_life_style=None):
+    def __init__(self, encounter=None, token_name='', boss=False, enemey_life_style=None):
         self.name = token_name
         self.pouch = Money()
         self.boss = boss
@@ -86,6 +129,8 @@ class Token:
         self.description = ''
         self.hit_points = 0
         self.inventory = Inventory(self)
+        self.encounter = encounter
+        self.id = str(uuid.uuid4())
 
         if token_name in MONSTER_DB['Name'].to_numpy():
             self.get_monster_from_database(token_name)
@@ -154,78 +199,125 @@ class Token:
 
         self.hit_points = hit_points
 
+    def token_block(self):
+        return f"""
+        <div class="monster_block" onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
+          <div><span class="monster_name">{self.name}</span>
+          <span class="glyphicon glyphicon-trash red al-right"></span></div>
+          <div class="gradient"></div>
+
+            <div class="red stat_small">
+                <div><span class="bold red">Armor Class</span><span>{self.ac}</span></div>
+                <div><span class="bold red">Hit Points</span><span>{self.hit_points}</span></div>
+                <div><span class="bold red">Speed</span><span>{self.info['Speed'].to_numpy()[0]}</span></div>
+            </div>
+        </div>
+        """
+
+    def get_token_stat_block(self):
+        return f"""
+            <div contenteditable="true"  style="width:310px; font-family:Arial,Helvetica,sans-serif;font-size:11px;">
+            <div class="name">{self.name}</div>
+            <div class="description">None</div>
+
+            <div class="gradient"></div>
+
+            <div class="red">
+                <div ><span class="bold red">Armor Class</span><span> {self.info['AC'].to_numpy()[0]}</span></div>
+                <div><span class="bold red">Hit Points</span><span> {self.hit_points}</span></div>
+                <div><span class="bold red">Speed</span><span> {self.info['Speed'].to_numpy()[0]}</span></div>
+            </div>
+
+            <div class="gradient"></div>
+
+            <table>
+                <tr><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>
+                <tr><td>{self.info['Strength'].to_numpy()[0]}</td><td>{self.info['Dexterity'].to_numpy()[0]}</td><td>{self.info['Constitution'].to_numpy()[0]}</td>
+                <td>{self.info['Intelligence'].to_numpy()[0]}</td><td>{self.info['Wisdom'].to_numpy()[0]}</td><td>{self.info['Charisma'].to_numpy()[0]}</td></tr>
+            </table>
+
+            <div class="gradient"></div>
+
+            <div><span class="bold">Senses</span><span>{self.info['Senses'].to_numpy()[0]}</span></div>
+            <div><span class="bold">Languages</span><span>{self.info['Languages'].to_numpy()[0]}</span></div>
+            <div><span class="bold">Challenge</span><span>{self.cr}</span></div> 
+
+            <div class="gradient"></div>
+
+            <div class="actions red">Actions</div>
+            <p>{self.info['Actions'].to_numpy()[0]}</p>
+            <div class="hr"></div>
+
+            </div>
+            """
+
     def __str__(self):
         return self.name
 
 
 class Encounter:
 
-    def __init__(self,
-                 cr=None,
-                 environment=None,
-                 base_token=None,
-                 num_boss_tokens=1,
-                 num_minion_tokens=None,
-                 enemy_lifestyle=LifeStyle.Poor,
-                 num_special_weapons=None,
-                 num_players=5,
-                 party_level=1,
+    def __init__(self, token_blueprint,
                  html=True):
+        # if cr is None and base_token is not None:
+        #     cr = Token(base_token).cr
 
-        if cr is None and base_token is not None:
-            cr = Token(base_token).cr
+        # print(cr)
+        # self.cr = cr
+        # self.environment = None
+        # self.base_token = base_token
+        # self.life_style = enemy_lifestyle
+        self.id = str(uuid.uuid4())
+        self.name = "Encounter"
+        self.tokens = self.generate_tokens(token_blueprint)
+        self.save()
+        # self.loot = []
 
-        print(cr)
-        self.cr = cr
-        self.environment = None
-        self.base_token = base_token
-        self.life_style = enemy_lifestyle
-        self.tokens = []
-        self.loot = []
+        # if num_minion_tokens is None:
+        #     if cr is not None:
+        #         party_cr_rating = ((party_level * num_players) / 4)
+        #         num_total_tokens = int(np.ceil(party_cr_rating / cr))
+        #     else:
+        #         num_total_tokens = num_players * 2
+        #
+        #     num_minion_tokens = num_total_tokens - num_boss_tokens
+        #
+        # self.num_boss_tokens = num_boss_tokens
+        # self.num_minion_tokens = num_minion_tokens
+        #
+        # if num_special_weapons is None and np.random.random() > .90:
+        #     num_special_weapons = 1
 
-        if num_minion_tokens is None:
-            if cr is not None:
-                party_cr_rating = ((party_level * num_players) / 4)
-                num_total_tokens = int(np.ceil(party_cr_rating / cr))
-            else:
-                num_total_tokens = num_players * 2
-
-            num_minion_tokens = num_total_tokens - num_boss_tokens
-
-        self.num_boss_tokens = num_boss_tokens
-        self.num_minion_tokens = num_minion_tokens
-
-        if num_special_weapons is None and np.random.random() > .90:
-            num_special_weapons = 1
-
-        self.generate_tokens()
-        if html:
-            create_html_stat_block(self.tokens)
+        # if html:
+        #     create_html_stat_block(self.tokens)
         # self.generate_loot()
 
-    def generate_tokens(self):
-        if self.environment is not None:
-            # pick something
-            pass
+    def generate_tokens(self, token_blueprint=None, environment=None):
+        if environment is not None:
+            return []
 
-        if self.base_token is None:
-            for i in range(self.num_boss_tokens):
-                token = Token(f'Enemy Boss {i + 1}', boss=True, enemey_life_style=self.life_style)
-                self.tokens.append(token)
-            for i in range(self.num_minion_tokens):
-                token = Token(f'Enemy Minion {i + 1}', enemey_life_style=self.life_style)
-                self.tokens.append(token)
-            return
+        tokens = []
+        for token in token_blueprint:
+            for i in range(token['boss_count']):
+                tokens.append(Token(self, token['name'], boss=True))
+            for i in range(token['minion_count']):
+                tokens.append(Token(self, token['name']))
 
-        for _ in range(self.num_boss_tokens):
-            token = Token(self.base_token, boss=True, enemey_life_style=self.life_style)
-            self.tokens.append(token)
+        return tokens
 
-        for _ in range(self.num_minion_tokens):
-            token = Token(self.base_token, enemey_life_style=self.life_style)
-            self.tokens.append(token)
+    def html_block(self):
+        f"""
+        <div class="encounter_block">{self.name}</div>
+        """
 
+    def save(self):
+        with open(f'./saves/{self.name}.encounter', 'wb') as f:
+            pickle.dump(self, f)
 
+    @staticmethod
+    def load(file_path):
+        with open(file_path, 'rb') as f:
+            return pickle.load(f)
 
 """
     (1, 40): 'FAILURE'   -- Nothing?
@@ -236,6 +328,8 @@ class Encounter:
     (67, 100): 'GREAT'   -- Uncommon Item (Non-Armor/Weapon) / Decent Mundane
 
 """
+
+
 class Inventory:
     def __init__(self, token=None):
         if token is None:
@@ -252,4 +346,3 @@ class Inventory:
                f'Weapons: {self.weapons}\n' \
                f'Armor:   {self.armor}\n' \
                f'Items:   {self.items}'
-
