@@ -3,7 +3,6 @@ import eel as eel
 import pandas as pd
 from loot_utils import Weapon, Encounter
 
-
 monster_df = pd.read_csv('./data/Bestiary_filtered.csv')
 item_df = pd.read_csv('./data/Items.csv')
 
@@ -35,11 +34,13 @@ def add_monster_to_encounter_builder(js_arr):
     s += "</tr>"
     return s
 
+
 @eel.expose
 def create_encounter(token_blueprint):
     print(token_blueprint)
     encounter = Encounter(token_blueprint)
     return True
+
 
 def encounter_selection_block(x):
     return f"""
@@ -49,7 +50,10 @@ def encounter_selection_block(x):
     </div>
     """
 
+
 Encounter_Object_List = None
+
+
 def get_all_encounters(reload=False):
     global Encounter_Object_List
     if Encounter_Object_List is None or reload:
@@ -67,6 +71,7 @@ def get_encounter_list():
 def load_encounter(encounter_id):
     # find the encounter in Ecounter_Object_List
     encounter = [x for x in get_all_encounters() if x.id == encounter_id][0]
+    encounter.sort_tokens()
     encounter_blocks = [token.token_block() for token in encounter.tokens]
     return ''.join(encounter_blocks)
 
@@ -78,5 +83,27 @@ def load_token_stat_block(encounter_id, token_id):
     print(encounter.tokens)
     print(token_id)
     print([x.id for x in encounter.tokens])
-    token     = [x for x in encounter.tokens if x.id == token_id][0]
+    token = [x for x in encounter.tokens if x.id == token_id][0]
     return token.get_token_stat_block()
+
+
+@eel.expose
+def change_p_init(encounter_id, token_id, value):
+    # find the encounter in Ecounter_Object_List
+    encounter = [x for x in get_all_encounters() if x.id == encounter_id][0]
+    print([x.id for x in encounter.tokens])
+    print("Token Change Init!!")
+    token = [x for x in encounter.tokens if x.id == token_id][0]
+    print(value)
+    token.initiative = int(value)
+    encounter.save()
+
+@eel.expose
+def change_t_name(encounter_id, token_id, value):
+    # find the encounter in Ecounter_Object_List
+    encounter = [x for x in get_all_encounters() if x.id == encounter_id][0]
+    print([x.id for x in encounter.tokens])
+    print("Token Change Init!!")
+    token = [x for x in encounter.tokens if x.id == token_id][0]
+    token.name = value
+    encounter.save()

@@ -14,7 +14,7 @@ def get_stat_block():
         
         <div class="gradient"></div>
         
-        <div class="red">
+        <div>
             <div ><span class="bold red">Armor Class</span><span> 11 (hide armor)</span></div>
             <div><span class="bold red">Hit Points</span><span> 59 (7d10+21)</span></div>
             <div><span class="bold red">Speed</span><span> 40 ft.</span></div>

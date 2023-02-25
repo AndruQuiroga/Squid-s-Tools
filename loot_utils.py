@@ -131,11 +131,12 @@ class Token:
         self.inventory = Inventory(self)
         self.encounter = encounter
         self.id = str(uuid.uuid4())
-
         if token_name in MONSTER_DB['Name'].to_numpy():
             self.get_monster_from_database(token_name)
 
         self.generate_wealth(enemey_life_style)
+        self.initiative = self.roll_initiative()
+
 
     def generate_wealth(self, wealth_type: LifeStyle):
         if wealth_type == LifeStyle.Wretched:
@@ -201,15 +202,16 @@ class Token:
 
     def token_block(self):
         return f"""
-        <div class="monster_block" onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
+        <div class="monster_block dark1 light" onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
           <div><span class="monster_name">{self.name}</span>
-          <span class="glyphicon glyphicon-trash red al-right"></span></div>
+          <span class="glyphicon glyphicon-trash al-right"></span></div>
           <div class="gradient"></div>
 
-            <div class="red stat_small">
-                <div><span class="bold red">Armor Class</span><span>{self.ac}</span></div>
-                <div><span class="bold red">Hit Points</span><span>{self.hit_points}</span></div>
-                <div><span class="bold red">Speed</span><span>{self.info['Speed'].to_numpy()[0]}</span></div>
+            <div class="light stat_small">
+                <div><span class="bold">Armor Class </span><span>{self.ac}</span></div>
+                <div><span class="bold">Hit Points </span><span>{self.hit_points}</span></div>
+                <div><span class="bold">Speed </span><span>{self.info['Speed'].to_numpy()[0]}</span></div>
+                <div><span class="bold">Initiative </span><span>{self.initiative}</span></div>
             </div>
         </div>
         """
@@ -217,15 +219,18 @@ class Token:
     def get_token_stat_block(self):
         return f"""
             <div contenteditable="true"  style="width:310px; font-family:Arial,Helvetica,sans-serif;font-size:11px;">
-            <div class="name">{self.name}</div>
+            
+            <input class='dark light' id='tname{self.id}' type='text' 
+            onchange="change_t_name('{self.encounter.id}', '{self.id}', 'tname{self.id}')" value='{self.name}'></div>
+            
             <div class="description">None</div>
 
             <div class="gradient"></div>
 
-            <div class="red">
-                <div ><span class="bold red">Armor Class</span><span> {self.info['AC'].to_numpy()[0]}</span></div>
-                <div><span class="bold red">Hit Points</span><span> {self.hit_points}</span></div>
-                <div><span class="bold red">Speed</span><span> {self.info['Speed'].to_numpy()[0]}</span></div>
+            <div>
+                <div ><span class="bold">Armor Class</span><span> {self.info['AC'].to_numpy()[0]}</span></div>
+                <div><span class="bold">Hit Points</span><span> {self.hit_points}</span></div>
+                <div><span class="bold">Speed</span><span> {self.info['Speed'].to_numpy()[0]}</span></div>
             </div>
 
             <div class="gradient"></div>
@@ -244,15 +249,57 @@ class Token:
 
             <div class="gradient"></div>
 
-            <div class="actions red">Actions</div>
+            <div class="actions">Actions</div>
             <p>{self.info['Actions'].to_numpy()[0]}</p>
-            <div class="hr"></div>
+            <div class="gradient"></div>
 
             </div>
             """
 
     def __str__(self):
         return self.name
+
+    def roll_initiative(self):
+        dex_mod = self.info['Dexterity'].to_numpy()[0] // 2 - 5
+        return np.random.randint(1, 21) + dex_mod
+
+    def __gt__(self, other):
+        return self.initiative > other.initiative
+
+    def __lt__(self, other):
+        return self.initiative < other.initiative
+
+
+class Player(Token):
+
+    def __init__(self, encounter, name):
+        self.name = name
+        self.encounter = encounter
+        self.id = str(uuid.uuid4())
+        self.initiative = 0
+        pass
+
+    def token_block(self):
+        return f"""
+        <div class="monster_block dark1 light" onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
+          <div><span class="monster_name">{self.name}</span>
+          <span class="glyphicon glyphicon-trash al-right"></span></div>
+          <div class="gradient"></div>
+
+            <div class="light stat_small">
+                <div><span class="bold">Initiative </span><span>{self.initiative}</span></div>
+            </div>
+        </div>
+        """
+
+    def get_token_stat_block(self):
+        return f"""
+            <div contenteditable="true"  style="width:310px; font-family:Arial,Helvetica,sans-serif;font-size:11px;">
+            <input class='dark light' id='pname{self.id}' type='text' 
+            onchange="change_t_name('{self.encounter.id}', '{self.id}', 'pname{self.id}')" value='{self.name}'></div>
+            <div class="description">initiative: <input class='dark light' id='pinit{self.id}' type='number' 
+            onchange="change_p_init('{self.encounter.id}', '{self.id}', 'pinit{self.id}')"></div>
+            """
 
 
 class Encounter:
@@ -270,6 +317,8 @@ class Encounter:
         self.id = str(uuid.uuid4())
         self.name = "Encounter"
         self.tokens = self.generate_tokens(token_blueprint)
+        for i in range(5):
+            self.tokens.append(Player(self, f"Player_{i}"))
         self.save()
         # self.loot = []
 
@@ -291,6 +340,9 @@ class Encounter:
         # if html:
         #     create_html_stat_block(self.tokens)
         # self.generate_loot()
+
+    def sort_tokens(self):
+        self.tokens.sort(reverse=True)
 
     def generate_tokens(self, token_blueprint=None, environment=None):
         if environment is not None:

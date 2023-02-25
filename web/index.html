@@ -15,13 +15,19 @@
 
 <div class="dark">
   <h1 class="editable">Squid's Tools</h1>
-  <div class="openBtn">
-      <button class="openButton" onclick="openForm()"><strong>Open Form</strong></button>
-    </div>
 </div>
 
-<div class="row dark">
-  <div class="encounter_selection dark2">
+<div class="row">
+  <div class="left-col dark2">
+
+    <div class="dark2 light">
+      <h5>Encounter List</h5>
+      <div class="openBtn">
+        <button onclick="openForm()"><strong>Create</strong></button>
+      </div>
+    </div>
+
+  <div class="encounter_selection">
     <div class="encounter_block">Test</div>
     <div class="encounter_block">Test</div>
     <div class="encounter_block">Test</div>
@@ -31,6 +37,7 @@
     <div class="encounter_block">Test</div>
 
 
+  </div>
   </div>
 
   <div id="selected_encounter" class="selected_encounter dark">
@@ -137,7 +144,10 @@ $(document).ready(function() {
     // $("#stat_block").html(html_block)
     document.getElementById("stat_block").innerHTML = html_block;
     // alert("The paragraph was clicked.");
+
   });
+
+  var selected_encounter_id = 0
 
   // $(".editable").dblclick(function (event){
   //   console.log(event)
@@ -153,15 +163,47 @@ $(document).ready(function() {
     refresh_encounter_list()
 });
 
+function refresh_encounter(){
+    load_encounter(selected_encounter_id);
+}
+
 function load_encounter(encounter_id){
     eel.load_encounter(encounter_id)().then(function (result) {
       $('.selected_encounter').html(result)
+      selected_encounter_id = encounter_id;
     });
 }
 
 function load_token_stat_block(encounter_id, token_id){
     eel.load_token_stat_block(encounter_id, token_id)().then(function (result) {
       $('#stat_block').html(result)
+    });
+}
+
+// stat_block on change event
+// var editable = document.getElementById('text');
+// editable.addEventListener('input', function() {
+//     console.log('Hey, somebody changed something in my text!');
+// });
+
+
+function change_p_init(encounter_id, token_id, inputid){
+    console.log(inputid)
+    let new_init = document.getElementById(inputid).value;
+    console.log(new_init)
+    eel.change_p_init(encounter_id, token_id, new_init)().then(function (result) {
+      refresh_encounter_list();
+      refresh_encounter();
+    });
+}
+
+function change_t_name(encounter_id, token_id, inputid){
+    console.log(inputid)
+    let new_init = document.getElementById(inputid).value;
+    console.log(new_init)
+    eel.change_t_name(encounter_id, token_id, new_init)().then(function (result) {
+      refresh_encounter_list();
+      refresh_encounter();
     });
 }
 
