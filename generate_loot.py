@@ -12,7 +12,7 @@ class Loot:
     def __init__(self, Encounter=None, loot_quality=None, num_enemies=None):
         self.encounter = Encounter
         self.loot_quality = loot_quality
-        self.loot = [token.inventory for token in self.encounter.tokens]
+        self.loot = [token.inventory for token in self.encounter.tokens if hasattr(token, 'inventory')]
         self.scale_wealth()
         self.roll_items()
 
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     if input('Load a file? (y/n): ') == 'y':
     # glob all pkl files in the current directory
 
-        files = glob('*.pkl')
+        files = glob('./saves/*.encounter')
 
         # ask user to select a file
         for i, file in enumerate(files):

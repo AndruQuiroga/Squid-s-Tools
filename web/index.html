@@ -197,6 +197,16 @@ function change_p_init(encounter_id, token_id, inputid){
     });
 }
 
+
+function change_t_hp(encounter_id, token_id, inputid) {
+  console.log(inputid)
+  let new_init = document.getElementById(inputid).value;
+  console.log(new_init)
+  eel.change_t_hp(encounter_id, token_id, new_init)().then(function (result) {
+    refresh_encounter_list();
+    refresh_encounter();
+  });
+}
 function change_t_name(encounter_id, token_id, inputid){
     console.log(inputid)
     let new_init = document.getElementById(inputid).value;

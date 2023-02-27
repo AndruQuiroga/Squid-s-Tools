@@ -3,7 +3,7 @@ import eel as eel
 import pandas as pd
 from loot_utils import Weapon, Encounter
 
-monster_df = pd.read_csv('./data/Bestiary_filtered.csv')
+monster_df = pd.read_csv('./data/Bestiary.csv')
 item_df = pd.read_csv('./data/Items.csv')
 
 
@@ -106,4 +106,14 @@ def change_t_name(encounter_id, token_id, value):
     print("Token Change Init!!")
     token = [x for x in encounter.tokens if x.id == token_id][0]
     token.name = value
+    encounter.save()
+
+@eel.expose
+def change_t_hp(encounter_id, token_id, value):
+    # find the encounter in Ecounter_Object_List
+    encounter = [x for x in get_all_encounters() if x.id == encounter_id][0]
+    print([x.id for x in encounter.tokens])
+    print("Token Change Init!!")
+    token = [x for x in encounter.tokens if x.id == token_id][0]
+    token.hit_points = int(value)
     encounter.save()

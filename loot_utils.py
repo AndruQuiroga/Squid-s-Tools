@@ -113,7 +113,7 @@ class LifeStyle(Enum):
 
 
 # load monster database
-MONSTER_DB = pd.read_csv('data/Bestiary_filtered.csv')
+MONSTER_DB = pd.read_csv('data/Bestiary.csv')
 
 
 class Token:
@@ -220,6 +220,7 @@ class Token:
         return f"""
             <div contenteditable="true"  style="width:310px; font-family:Arial,Helvetica,sans-serif;font-size:11px;">
             
+            <div>
             <input class='dark light' id='tname{self.id}' type='text' 
             onchange="change_t_name('{self.encounter.id}', '{self.id}', 'tname{self.id}')" value='{self.name}'></div>
             
@@ -229,7 +230,12 @@ class Token:
 
             <div>
                 <div ><span class="bold">Armor Class</span><span> {self.info['AC'].to_numpy()[0]}</span></div>
-                <div><span class="bold">Hit Points</span><span> {self.hit_points}</span></div>
+                <div><span class="bold">Hit Points</span><span> 
+                
+                <input class='dark light' id='thp{self.id}' type='text' 
+            onchange="change_t_hp('{self.encounter.id}', '{self.id}', 'thp{self.id}')" value='{self.hit_points}'>
+                </span></div>
+                
                 <div><span class="bold">Speed</span><span> {self.info['Speed'].to_numpy()[0]}</span></div>
             </div>
 
