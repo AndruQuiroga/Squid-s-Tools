@@ -10,7 +10,39 @@ h1 {
     padding: 0px 5px;
 }
 
-.editable {
+.loot-table {
+    /*center the contents*/
+    width: 80%;
+    margin: auto;
+    /*display: flex;*/
+    /*padding: 10px;*/
+
+}
+
+.loot-block {
+    background-color: #635985;
+    white-space: pre-line;
+    border-radius: 5px;
+    color: white;
+    text-align: center;
+    font-size: 50%;
+    margin: 10px;
+    padding: 10px;
+    width: 200px;
+}
+
+.loot-block:hover {
+  background-color: #443C68;
+}
+
+.loot-block-clicked {
+    color: #393053;
+    background-color: #1F1D36;
+}
+
+.text-seemless {
+
+    border: 0;
 
 }
 
@@ -102,6 +134,10 @@ body {
     /*margin-left: 0px;*/
 }
 
+.glyphicon:hover {
+    color: #1c87c9;
+}
+
 .stat_block {
     flex: 60%;
     padding: 10px;
@@ -110,6 +146,11 @@ body {
 
     overflow-y:auto;
     position:relative;
+}
+
+.dead {
+    background-color: #18122B;
+    color: #393053;
 }
 
 .gradient {
@@ -142,12 +183,6 @@ body {
     color:#A73335;
 }
 
-/*table {*/
-/*    width:100%;*/
-/*    border:0px;*/
-/*    border-collapse:collapse;*/
-/*    color:#A73335;*/
-/*}*/
 th, td {
     width:200px;
     text-align:center;
@@ -195,12 +230,14 @@ padding: 14px 20px;
 cursor: pointer;
 position: fixed;
 }
-.loginPopup {
+
+.PopupContainer {
 position: relative;
 text-align: center;
 width: 100%;
 }
-.formPopup {
+
+.EncounterCreation {
 display: none;
 position: fixed;
 left: 45%;

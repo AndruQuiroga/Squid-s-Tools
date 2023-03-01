@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Squid's Tools</title>
     <link rel="stylesheet" href="./css/styles.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
 </head>
@@ -14,120 +14,67 @@
 <body>
 
 <div class="dark">
-  <h1 class="editable">Squid's Tools</h1>
+    <h1>Squid's Tools</h1>
 </div>
 
 <div class="row">
-  <div class="left-col dark2">
+    <div class="left-col dark2">
 
-    <div class="dark2 light">
-      <h5>Encounter List</h5>
-      <div class="openBtn">
-        <button onclick="openForm()"><strong>Create</strong></button>
-      </div>
+        <div class="dark2 light">
+            <h5>Encounter List</h5>
+            <div class="openBtn">
+                <button onclick="openForm()"><strong>Create</strong></button>
+            </div>
+        </div>
+
+        <div class="encounter_selection">
+            <!--    <div class="encounter_block">Test</div>-->
+            <!--    <div class="encounter_block">Test</div>-->
+            <!--    <div class="encounter_block">Test</div>-->
+            <!--    <div class="encounter_block">Test</div>-->
+            <!--    <div class="encounter_block">Test</div>-->
+            <!--    <div class="encounter_block">Test</div>-->
+            <!--    <div class="encounter_block">Test</div>-->
+        </div>
     </div>
 
-  <div class="encounter_selection">
-<!--    <div class="encounter_block">Test</div>-->
-<!--    <div class="encounter_block">Test</div>-->
-<!--    <div class="encounter_block">Test</div>-->
-<!--    <div class="encounter_block">Test</div>-->
-<!--    <div class="encounter_block">Test</div>-->
-<!--    <div class="encounter_block">Test</div>-->
-<!--    <div class="encounter_block">Test</div>-->
+    <div id="selected_encounter" class="selected_encounter dark">
 
 
-  </div>
-  </div>
+        <!--    <div class="monster_block dark1 light">-->
+        <!--      <div><span class="monster_name">Ogre</span><span class="glyphicon glyphicon-trash al-right"></span></div>-->
+        <!--      <div class="gradient"></div>-->
 
-  <div id="selected_encounter" class="selected_encounter dark">
+        <!--      <div class="light stat_small">-->
+        <!--        <div><span class="bold">Armor Class</span><span> 11 (hide armor)</span></div>-->
+        <!--        <div><span class="bold">Hit Points</span><span> 59 (7d10+21)</span></div>-->
+        <!--        <div><span class="bold">Speed</span><span> 40 ft.</span></div>-->
+        <!--      </div>-->
+        <!--    </div>-->
 
+        <!--    <div id="Monster1" class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+        <!--    <div class="monster_block">Test</div>-->
+    </div>
 
+    <div id="stat_block" class="stat_block">
 
-<!--    <div class="monster_block dark1 light">-->
-<!--      <div><span class="monster_name">Ogre</span><span class="glyphicon glyphicon-trash al-right"></span></div>-->
-<!--      <div class="gradient"></div>-->
-
-<!--      <div class="light stat_small">-->
-<!--        <div><span class="bold">Armor Class</span><span> 11 (hide armor)</span></div>-->
-<!--        <div><span class="bold">Hit Points</span><span> 59 (7d10+21)</span></div>-->
-<!--        <div><span class="bold">Speed</span><span> 40 ft.</span></div>-->
-<!--      </div>-->
-<!--    </div>-->
-
-<!--    <div id="Monster1" class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-<!--    <div class="monster_block">Test</div>-->
-  </div>
-
-  <div id="stat_block" class="stat_block">
-
-  </div>
+    </div>
 
 </div>
 
 
-
-<div class="loginPopup">
-  <div class="formPopup" id="popupForm">
-      <form class="formContainer">
-
-        <div>
-          <span>Monster Name: </span>
-          <span>
-            <select id="select-state" class="js-example-data-array" placeholder="Pick a state...">
-                    <option value="">Select a state...</option>
-            </select>
-          </span>
-          <span>
-            <button type="button" class="btn" onclick="addSelection()">Add</button>
-          </span>
-        </div>
-
-<!--  List Selected Monsters -->
-        <div class="stat_small">
-        <table id="Encounter-Builder-Table">
-
-        <colgroup>
-        <col span="1" style="width: 30%;">
-        <col span="1" style="width: 50%;">
-        <col span="1" style="width: 10%;">
-        <col span="1" style="width: 10%;">
-        <col span="1" style="width: 10%;">
-        </colgroup>
-
-        <tbody>
-        <tr>
-          <th>Creature Name</th>
-          <th>Weapons</th>
-          <th># Minions</th>
-          <th># Bosses</th>
-          <th>Generate Loot? (Items)</th>
-          <th></th>
-        </tr>
-
-        </tbody>
-
-        </table>
-        </div>
-        <div>
-          <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
-          <button type="button" class="btn cancel" onclick="sendForm()">Create</button>
-        </div>
-
-
-
-
-      </form>
-  </div>
+<div class="PopupContainer">
+    <div class="EncounterCreation" id="EncounterCreation">
+    </div>
 </div>
 
 
@@ -138,174 +85,207 @@
 </script>
 
 <script>
-$(document).ready(function() {
-  $("#Monster1").click(async function () {
-    let html_block = await eel.get_stat_block()();
-    // $("#stat_block").html(html_block)
-    document.getElementById("stat_block").innerHTML = html_block;
-    // alert("The paragraph was clicked.");
 
-  });
+    let selected_encounter_id = 0;
 
-  var selected_encounter_id = 0
+    $(document).ready(function () {
 
-  // $(".editable").dblclick(function (event){
-  //   console.log(event)
-  // });
+        $(document).on('click', '.glyphicon-screenshot', function () {
+            // get parent stat-block
+            let token_block = $(this).parent().parent()
 
-  eel.get_monster_list()().then(function (result) {
-    console.log(result)
-    $('#select-state').select2(
-            {data: result}
-    );
-  });
+            // if parent stat-block already has the dead class return
+            if (token_block.hasClass('dead')) {
+                return
+            }
 
-    refresh_encounter_list()
-});
+            let token_id = token_block.attr('id')
+            change_t_init(selected_encounter_id, token_id, null, -99)
+            change_t_hp(selected_encounter_id, token_id, null, 0)
 
-function refresh_encounter(){
-    load_encounter(selected_encounter_id);
-}
+            // let token_name = token_block.find('.token_name').html()
+            // change_t_name(selected_encounter_id, token_id, null, token_name)
+        });
 
-function load_encounter(encounter_id){
-    eel.load_encounter(encounter_id)().then(function (result) {
-      $('.selected_encounter').html(result)
-      selected_encounter_id = encounter_id;
+        $(document).on('click', '.glyphicon-trash', function () {
+            // ask user if they really want to do this
+            let token_block = $(this).parent().parent()
+            let token_name = token_block.find('.token_name').html()
+            let token_id = token_block.attr('id')
+            if (!confirm('Are you sure you want to delete ' + token_name + '?' + '\nLoot will be deleted as well.')) {
+                return
+            }
+
+            eel.delete_token(selected_encounter_id, token_id)().then(function (result) {
+                refresh_encounter()
+            });
+
+        });
+
+        refresh_encounter_list()
     });
-}
 
-function load_token_stat_block(encounter_id, token_id){
-    eel.load_token_stat_block(encounter_id, token_id)().then(function (result) {
-      $('#stat_block').html(result)
-    });
-}
+    function refresh_encounter() {
+        load_encounter(selected_encounter_id);
+    }
 
-// stat_block on change event
-// var editable = document.getElementById('text');
-// editable.addEventListener('input', function() {
-//     console.log('Hey, somebody changed something in my text!');
-// });
+    function load_encounter(encounter_id) {
+        eel.load_encounter(encounter_id)().then(function (result) {
+            $('.selected_encounter').html(result)
+            selected_encounter_id = encounter_id;
+        });
+    }
+
+    function load_token_stat_block(encounter_id, token_id) {
+        eel.load_token_stat_block(encounter_id, token_id)().then(function (result) {
+            $('#stat_block').html(result)
+        });
+    }
+
+    function change_t_init(encounter_id, token_id, inputid, value) {
+        let new_value = (inputid === null) ? value : document.getElementById(inputid).value;
+        eel.change_t_init(encounter_id, token_id, new_value)().then(function (result) {
+            refresh_encounter_list();
+            refresh_encounter();
+        });
+    }
 
 
-function change_p_init(encounter_id, token_id, inputid){
-    console.log(inputid)
-    let new_init = document.getElementById(inputid).value;
-    console.log(new_init)
-    eel.change_p_init(encounter_id, token_id, new_init)().then(function (result) {
-      refresh_encounter_list();
-      refresh_encounter();
-    });
-}
+    function change_t_hp(encounter_id, token_id, inputid, value) {
+        let new_value = (inputid === null) ? value : document.getElementById(inputid).value;
+        eel.change_t_hp(encounter_id, token_id, new_value)().then(function (result) {
+            refresh_encounter_list();
+            refresh_encounter();
+        });
+    }
+
+    function change_t_name(encounter_id, token_id, inputid, value) {
+        let new_value = (inputid === null) ? value : document.getElementById(inputid).value;
+        eel.change_t_name(encounter_id, token_id, new_value)().then(function (result) {
+            refresh_encounter_list();
+            refresh_encounter();
+        });
+    }
 
 
-function change_t_hp(encounter_id, token_id, inputid) {
-  console.log(inputid)
-  let new_init = document.getElementById(inputid).value;
-  console.log(new_init)
-  eel.change_t_hp(encounter_id, token_id, new_init)().then(function (result) {
-    refresh_encounter_list();
-    refresh_encounter();
-  });
-}
-function change_t_name(encounter_id, token_id, inputid){
-    console.log(inputid)
-    let new_init = document.getElementById(inputid).value;
-    console.log(new_init)
-    eel.change_t_name(encounter_id, token_id, new_init)().then(function (result) {
-      refresh_encounter_list();
-      refresh_encounter();
-    });
-}
+    async function get_monster_list() {
+        await eel.get_monster_list()().then(function (result) {
+            console.log(result)
+            $('.monster-selection').select2(
+                {
+                    data: result
+                    // width: '100%'
+                }
+            );
+        });
+    }
 
-async function get_weapon_list(){
-  await eel.get_weapon_list()().then(function(result){
-    console.log(result)
-    $('.weapon-selection').select2(
-        {
-          data: result,
-          width: '100%'
-        }
-  );
-  });
-}
+    async function get_weapon_list() {
+        await eel.get_weapon_list()().then(function (result) {
+            $('.weapon-selection').select2(
+                {
+                    data: result,
+                    width: '100%'
+                }
+            );
+        });
+    }
 
-function refresh_encounter_list(){
-    eel.get_encounter_list()().then(function (result) {
-        $('.encounter_selection').html(result)
-    });
-}
-
-  // async function get_monster_list(){
-  //   await eel.get_monster_list()().then(function(result){
-  //     $('.js-example-data-array').select2(
-  //         {data: result}
-  //   );
-  //   });
-  // }
-
-  // get_monster_list()
-  // $('.weapon-selection').select2({ width: '100%' });
+    function refresh_encounter_list() {
+        eel.get_encounter_list()().then(function (result) {
+            $('.encounter_selection').html(result)
+        });
+    }
 
 </script>
 <script>
 
     function openForm() {
-      document.getElementById("popupForm").style.display = "block";
+        eel.clear_encounter_builder()().then(function (result) {
+            $('#EncounterCreation').html(result)
+            get_monster_list();
+            document.getElementById("EncounterCreation").style.display = "block";
+        });
     }
+
     function closeForm() {
-      document.getElementById("popupForm").style.display = "none";
+        document.getElementById("EncounterCreation").style.display = "none";
+    }
+
+    function remove_entry() {
+        console.log('remove_entry')
+        console.log($(this))
+        $(this).closest('tr').remove();
+        console.log('remove_entry2')
     }
 
     async function addSelection() {
-      let jsarr = $('.js-example-data-array').select2('data');
-      await eel.add_monster_to_encounter_builder(jsarr)().then(function(result) {
-        $('#Encounter-Builder-Table > tbody:last-child').append(result)
-        get_weapon_list();
-      });
+        let jsarr = $('.monster-selection').select2('data');
+        await eel.add_monster_to_encounter_builder(jsarr)().then(function (result) {
+            let html = result[0];
+            let weapon_list = result[1];
+            console.log(html)
+            console.log(weapon_list)
+            $('#Encounter-Builder-Table > tbody:last-child').append(html)
+            $('#Encounter-Builder-Table > tbody:last-child').find('.weapon-selection').select2(
+                {
+                    data: weapon_list,
+                    width: '100%'
+                });
+
+            $(".remove_btn").click(function (event) {
+                event.preventDefault();
+                $(this).closest('tr').remove();
+            });
+        });
     }
 
     function sendForm() {
-      document.getElementById("popupForm").style.display = "none";
-      console.log("TEST");
-      let arr = [];
-      $('#Encounter-Builder-Table > tbody > tr').each(function(index, tr) {
-        if (index === 0) {
-          return;
-        }
-        let tds = $(this).find('td');
-        console.log(tr);
-        let name = tds[0].innerText;
-        let weapon = $(this).find(".weapon-selection").select2('data');
-        let minions = parseInt(tds[2].getElementsByTagName('input')[0].value);
-        let bosses = parseInt(tds[3].getElementsByTagName('input')[0].value);
-        let loot = tds[4].getElementsByTagName('input')[0].checked;
-        arr.push({
-          "name": name,
-          "weapons": weapon,
-          "minion_count": minions,
-          "boss_count": bosses,
-          "loot": loot});
+        document.getElementById("EncounterCreation").style.display = "none";
+        let arr = [];
+        $('#Encounter-Builder-Table > tbody > tr').each(function (index, tr) {
+            if (index === 0) {
+                return;
+            }
+            if (index === 1) {
+                let tds = $(this).find('td');
+                let name = tds[0].innerText;
+                let minions = parseInt(tds[2].getElementsByTagName('input')[0].value);
+                arr.push({
+                    "name": name,
+                    "weapons": null,
+                    "minion_count": minions,
+                    "boss_count": null,
+                    "loot": null
+                });
+                return;
+            }
 
-      });
+            let tds = $(this).find('td');
+            console.log(tds)
+            let name = tds[0].innerText;
+            let weapon = $(this).find(".weapon-selection").select2('data');
+            // get juts the id from each weapon
+            weapon = [].concat.apply([], weapon.map(function (x) {
+                return x.id;
+            }));
+            let minions = parseInt(tds[2].getElementsByTagName('input')[0].value);
+            let bosses = parseInt(tds[3].getElementsByTagName('input')[0].value);
+            let loot = tds[4].getElementsByTagName('input')[0].checked;
+            arr.push({
+                "name": name,
+                "weapons": weapon,
+                "minion_count": minions,
+                "boss_count": bosses,
+                "loot": loot
+            });
 
-      eel.create_encounter(arr)().then(function(result) {
-        refresh_encounter_list();
-      });
+        });
+
+        eel.create_encounter(arr)().then(function (result) {
+            refresh_encounter_list();
+        });
 
     }
 
 </script>
-
-<!--  ;-->
-
-<!--<script>-->
-<!--  $(document).ready(function(){-->
-<!--  $("#selected_encounter").contextmenu(function(e){-->
-<!--    e.preventDefault();-->
-<!--    $("#contextMenu").css({display: "block", left:e.pageX, top:e.pageY});-->
-<!--  });-->
-<!--    $(document).click(function(){-->
-<!--        $("#contextMenu").hide();-->
-<!--    });-->
-<!--});-->
-<!--</script>-->

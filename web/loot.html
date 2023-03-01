@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body>
+
+<div id="loot-table" class="loot-table">
+
+  <div class="loot-block">Bandit 1
+    Money: 2sp
+    Weapons: Sword
+    Armor: Chainmail
+    Items: Potion of Healing
+  </div>
+
+</div>
+
+
+</body>
+<script>
+    $(document).ready(function () {
+        let loot_table = document.getElementById("loot-table");
+         eel.get_loot_table()().then(function (result) {
+            console.log(result);
+            loot_table.innerHTML = result;
+        });
+
+     // make loot-block clickable and change color on click
+    $(document).on('click', '.loot-block', function () {
+        $(this).toggleClass('loot-block-clicked');
+    });
+
+});
+
+
+</script>
+</html>
