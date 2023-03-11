@@ -11,6 +11,11 @@ setup(
                         'web/js/*.js', 'data/*.csv'],
     },
     url='https://github.com/AndruQuiroga/Squid-s-Tools',
+    entry_points={
+        'SquidsTools': [
+            'SquidsTools=SquidsTools.run:main'
+        ]
+    },
     license='',
     author='Dreski',
     author_email='',
