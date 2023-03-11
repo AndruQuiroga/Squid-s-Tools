@@ -12,7 +12,7 @@ setup(
     },
     url='https://github.com/AndruQuiroga/Squid-s-Tools',
     entry_points={
-        'SquidsTools': [
+        'console_scripts': [
             'SquidsTools=SquidsTools.run:main'
         ]
     },
