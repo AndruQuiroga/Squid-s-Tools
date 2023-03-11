@@ -1,4 +1,4 @@
-import glob
+import os
 import pickle
 import uuid
 from enum import Enum
@@ -23,6 +23,9 @@ class Item:
 
 
 def scan_token_for_weapons(token_actions):
+    if isinstance(token_actions, float):
+        return []
+
     weapon_names = [w.name for w in Weapon.get_all_weapons()]
     weapon_names = [x.split(' (')[0] for x in weapon_names]
     weapons_found = []
@@ -90,7 +93,7 @@ class Weapon:
     @classmethod
     def get_all_weapons(cls):
         if cls.WEAPON_DB is None:
-            df = pd.read_csv('./data/Items.csv')
+            df = pd.read_csv('data/Items.csv')
             df = df[['weapon' in str(x) for x in df['Type'].to_numpy()]]
             weapons = [Weapon.create_weapon_from_row(row) for index, row in df.iterrows()]
 
@@ -208,7 +211,7 @@ class Token:
                  encounter=None,
                  token_name='',
                  boss=False,
-                 weapons=None,
+                 weapons=(),
                  life_style=None,
                  lootable=True):
 
@@ -224,8 +227,12 @@ class Token:
         self.lootable = lootable
         self.info = None
 
-        self.hit_points = 0
+        self.hit_points = -1
+        self.initiative = -1
         self.inventory = Inventory(self, weapons=weapons)
+
+        if "Item" in self.name:
+            return
 
         self.get_monster_from_database(token_name)
         self.set_hit_points()
@@ -336,7 +343,25 @@ class Token:
             
             </div>
             """
+        s += '<div class="gradient"></div>'
+        return s
 
+    def get_trait_blocks(self):
+
+        s = '<div class="actions">Traits</div>'
+        traits = ['Senses',
+                  'Languages',
+                  'Skills',
+                  'Saving Throws',
+                  'Damage Vulnerabilities',
+                  'Damage Resistances',
+                  'Condition Immunities']
+        for trait in traits:
+            if isinstance(self.info[trait], float):
+                continue
+            s += f"<div><span class='bold'>{trait}</span><span> {self.info[trait]}</span></div>"
+        if s == '<div class="actions">Traits</div>':
+            return ''
         s += '<div class="gradient"></div>'
         return s
 
@@ -361,7 +386,6 @@ class Token:
                 </div>
             </div>
             """
-
         s += '<div class="gradient"></div>'
         return s
 
@@ -393,17 +417,12 @@ class Token:
 
             <table>
                 <tr><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>
-                <tr><td>{self.info['Strength']}</td><td>{self.info['Dexterity']}</td><td>{self.info['Constitution']}</td>
-                <td>{self.info['Intelligence']}</td><td>{self.info['Wisdom']}</td><td>{self.info['Charisma']}</td></tr>
+                <tr><td>{self.info['Strength']:2.0f}</td><td>{self.info['Dexterity']:2.0f}</td><td>{self.info['Constitution']:2.0f}</td>
+                <td>{self.info['Intelligence']:2.0f}</td><td>{self.info['Wisdom']:2.0f}</td><td>{self.info['Charisma']:2.0f}</td></tr>
             </table>
-
             <div class="gradient"></div>
-
-            <div><span class="bold">Senses</span><span> {self.info['Senses']}</span></div>
-            <div><span class="bold">Languages</span><span> {self.info['Languages']}</span></div>
-            <div><span class="bold">Challenge</span><span> {self.info['CR']}</span></div> 
-
-            <div class="gradient"></div>
+            
+            {self.get_trait_blocks()}
 
             <div class="actions">Actions</div>
             <p>{self.info['Actions']}</p>
@@ -430,6 +449,66 @@ class Token:
         return self.initiative < other.initiative
 
 
+class ItemToken(Token):
+
+    def __init__(self,
+                 encounter=None,
+                 token_name='',
+                 boss=False,
+                 weapons=(),
+                 life_style=None,
+                 lootable=True):
+
+        self.encounter = encounter
+        self.id = str(uuid.uuid4())
+        self.name = token_name
+        self.boss = boss
+        self.life_style = life_style
+        self.lootable = lootable
+        self.info = None
+        self.initiative = -1
+
+        if "Mundane" in self.name:
+            self.inventory = Inventory.preroll('mundane')
+        elif "Common" in self.name:
+            self.inventory = Inventory.preroll('common')
+        elif "Uncommon" in self.name:
+            self.inventory = Inventory.preroll('uncommon')
+        else:
+            self.inventory = Inventory.preroll()
+            self.name += f" ({self.inventory.items[0].rarity})"
+
+    def token_block(self):
+        return f"""
+        <div class="monster_block dark1 light" id="{self.id}"
+        onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
+
+          <div>
+              <span class="token_name">{self.name}</span>
+              <span class="glyphicon glyphicon-trash al-right"></span>
+          </div>
+
+          <div class="gradient"></div>
+        </div>
+        """
+
+    def get_token_stat_block(self):
+        return f"""
+            <div style="width:310px; font-family:Arial,Helvetica,sans-serif;font-size:11px;">
+
+            <div>
+            <input class='dark light text-seemless' id='tname{self.id}' type='text' style='font-size:200%;
+            font-family:Georgia, serif;font-variant:small-caps; width: 100%;'
+            onchange="change_t_name('{self.encounter.id}', '{self.id}', 'tname{self.id}')" value='{self.name}'></div>
+
+            {self.get_weapon_blocks()}
+
+            {self.get_item_blocks()}
+
+            </div>
+            """
+
+
 class Player(Token):
 
     def __init__(self, encounter, name):
@@ -443,7 +522,7 @@ class Player(Token):
     def token_block(self):
         return f"""
         <div class="monster_block dark1 light" onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
-          <div><span class="monster_name">{self.name}</span>
+          <div><span class="token_name">{self.name}</span>
           <span class="glyphicon glyphicon-trash al-right"></span></div>
           <div class="gradient"></div>
 
@@ -467,7 +546,9 @@ class Encounter:
 
     def __init__(self, token_blueprint, name=None):
         if name is None:
-            name = self.generate_name()
+            name = "Encounter"
+
+        name = self.check_name_uniqueness(name)
 
         self.id = str(uuid.uuid4())
         self.name = name
@@ -476,6 +557,10 @@ class Encounter:
 
     def sort_tokens(self):
         self.tokens.sort(reverse=True)
+
+    def add_tokens(self, token_blueprint=None):
+        self.tokens += self.generate_tokens(token_blueprint)
+        self.save()
 
     def generate_tokens(self, token_blueprint=None, environment=None):
         if environment is not None:
@@ -488,9 +573,14 @@ class Encounter:
                     tokens.append(Player(self, f'Player {i + 1}'))
                 continue
 
-            if token['name'] == 'Shelve':
+            if token['name'] == 'TOKEN':
                 for i in range(token['minion_count']):
-                    tokens.append(Player(self, f'Player {i + 1}'))
+                    tokens.append(Player(self, f'TOKEN {i + 1}'))
+                continue
+
+            if 'Item' in token['name'] or token['name'] == 'Lootable Container':
+                for i in range(token['minion_count']):
+                    tokens.append(ItemToken(self, f"{token['name']}"))
                 continue
 
             for i in range(token['boss_count']):
@@ -505,14 +595,12 @@ class Encounter:
         <div class="encounter_block">{self.name}</div>
         """
 
-    def generate_loot(self, loot_roll, num_lootable):
-        loot_roll = int(loot_roll)
-        num_lootable = int(num_lootable)
+    def generate_loot(self):
+        # loot_roll = int(loot_roll)
+        # num_lootable = int(num_lootable)
 
         s = ''
         lootable = [token.inventory for token in self.tokens if token.lootable]
-        for _ in range(num_lootable):
-            lootable.append(Inventory.preroll())
 
         for i in range(len(lootable)):
             s += '<div>'
@@ -522,8 +610,13 @@ class Encounter:
         return s
 
     def save(self):
-        with open(f'./saves/{self.name}.encounter', 'wb') as f:
+        if not os.path.exists('saves'):
+            os.makedirs('saves')
+        with open(f'saves/{self.name}.encounter', 'wb') as f:
             pickle.dump(self, f)
+
+    def delete(self):
+        os.remove(f'saves/{self.name}.encounter')
 
     @staticmethod
     def load(file_path):
@@ -531,12 +624,15 @@ class Encounter:
             return pickle.load(f)
 
     @staticmethod
-    def generate_name():
-        files = glob.glob('./saves/*.encounter')
-        if len(files) == 0:
-            return "Encounter_1"
-        else:
-            return f"Encounter_{len(files) + 1}"
+    def check_name_uniqueness(name):
+        # if name exists, add a number to the end
+        if os.path.exists(f'saves/{name}.encounter'):
+            i = 1
+            while os.path.exists(f'saves/{name} ({i}).encounter'):
+                i += 1
+            name = f'{name} ({i})'
+        return name
+
 
 
 """
@@ -550,7 +646,7 @@ class Encounter:
 """
 
 class Inventory:
-    def __init__(self, token=None, weapons=None):
+    def __init__(self, token=None, weapons=()):
         if token is None:
             self.token = Token()
             self.money = Money()
@@ -598,6 +694,9 @@ class Inventory:
             # item = f"({item_rarity}) {item['Name']}"
             self.items.append(item)
 
+            if self.token:
+                self.token.name = f"{self.token.name} ({item_rarity})"
+
         pass
 
     def replace_item(self, old_item):
@@ -613,7 +712,6 @@ class Inventory:
     def preroll(rarity=None):
         tmp = Inventory()
         tmp.generate_loot(item_rarity=rarity, item_spawn_chance=1.00)
-        print("HERE", tmp.items[0].name)
         return tmp
 
     def loot_block(self):

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Squid's Tools</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="text/javascript" src="/js/main.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+<div class="dark">
+    <h1>Squid's Tools</h1>
+</div>
+
+<div class="row">
+    <div class="left-col dark2">
+
+        <div class="dark2 light">
+            <h5>Encounter List</h5>
+            <button class="button" style="width: 80%" onclick="openForm()"><strong>Create Encounter</strong></button>
+            <button class="button" style="width: 80%" onclick="openShopForm()"><strong>Create Shop</strong></button>
+        </div>
+
+        <div class="encounter_selection">
+
+        </div>
+    </div>
+
+    <div id="selected_encounter" class="selected_encounter dark">
+
+    </div>
+
+    <div id="stat_block" class="stat_block">
+
+    </div>
+
+</div>
+
+
+<div class="PopupContainer">
+    <div class="EncounterCreation" id="EncounterCreation">
+    </div>
+</div>
+
+<div class="PopupContainer">
+    <div class="LootCreation" id="LootCreation">
+    </div>
+</div>
+
+<div class="PopupContainer">
+    <div class="ShopInventory" id="ShopInventory">
+    </div>
+</div>
+
+<div class="PopupContainer">
+    <div class="EncounterCreation" id="AddToken">
+    </div>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+
+</script>
+
+<script>
+
+    let selected_encounter_id = 0;
+    let selected_token_id = 0;
+
+    $(document).ready(function () {
+
+        refresh_encounter_list();
+
+        $(document).on('click', '.glyphicon-screenshot', function () {
+            // get parent stat-block
+            let token_block = $(this).parent().parent()
+
+            // if parent stat-block already has the dead class return
+            if (token_block.hasClass('dead')) {
+                return
+            }
+
+            let token_id = token_block.attr('id')
+            change_t_init(selected_encounter_id, token_id, null, -99)
+            change_t_hp(selected_encounter_id, token_id, null, 0)
+
+            // let token_name = token_block.find('.token_name').html()
+            // change_t_name(selected_encounter_id, token_id, null, token_name)
+        });
+
+        $(document).on('click', '.glyphicon-trash', function () {
+            // ask user if they really want to do this
+            let token_block = $(this).parent().parent()
+            let token_name = token_block.find('.token_name').html()
+            let token_id = token_block.attr('id')
+            if (!confirm('Are you sure you want to delete ' + token_name + '?' + '\nLoot will be deleted as well.')) {
+                return
+            }
+
+            eel.delete_token(selected_encounter_id, token_id)().then(function (result) {
+                refresh_encounter()
+            });
+
+        });
+
+        // $(document).on('click', '.glyphicon-refresh', function () {
+        //     // ask user if they really want to do this
+        //     let token_block = $(this).parent().parent()
+        //     let token_name = token_block.find('.token_name').html()
+        //     let token_id = token_block.attr('id')
+        //
+        //     // encounter_id, token_id, item_id
+        //
+        // });
+
+        $(document).on('click', '.item_block', function () {
+            // ask user if they really want to do this
+            let item_disc = $(this).find('.item_desc')
+
+            if (item_disc.css('display') === 'block') {
+                item_disc.css('display', 'none')
+                return
+            }
+
+            if (item_disc.css('display') === 'none') {
+                item_disc.css('display', 'block')
+                return
+            }
+
+        });
+
+        $(document).on('click', '.weapon_block', function () {
+            // ask user if they really want to do this
+            let item_disc = $(this).find('.weapon_desc')
+
+            if (item_disc.css('display') === 'block') {
+                item_disc.css('display', 'none')
+                return
+            }
+
+            if (item_disc.css('display') === 'none') {
+                item_disc.css('display', 'block')
+                return
+            }
+
+        });
+    });
+
+    function refresh_encounter() {
+        if (selected_encounter_id === 0) {
+            $('.selected_encounter').html("")
+            return
+        }
+        load_encounter(selected_encounter_id);
+    }
+
+    function refresh_stat_block() {
+        load_token_stat_block(selected_encounter_id, selected_token_id);
+    }
+
+    function load_encounter(encounter_id) {
+        eel.load_encounter(encounter_id)().then(function (result) {
+            $('.selected_encounter').html(result)
+            selected_encounter_id = encounter_id;
+        });
+    }
+
+    function load_token_stat_block(encounter_id, token_id) {
+        selected_token_id = token_id;
+        eel.load_token_stat_block(encounter_id, token_id)().then(function (result) {
+            $('#stat_block').html(result)
+        });
+    }
+
+
+</script>

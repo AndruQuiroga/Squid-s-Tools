@@ -2,7 +2,7 @@ import pandas as pd
 from tabulate import tabulate
 
 # load item csv
-items = pd.read_csv('data/Items.csv')
+items = pd.read_csv('../SquidTools/data/Items.csv')
 
 if __name__ == '__main__':
     # ask user for rarity with numbers
