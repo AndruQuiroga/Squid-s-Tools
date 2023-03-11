@@ -1,7 +1,10 @@
+import os
 import numpy as np
 import pandas as pd
 
-ITEM_DATABASE = pd.read_csv('data/Items_filtered.csv')
+this_dir, this_filename = os.path.split(__file__)
+data_path = os.path.join(this_dir, 'data')
+ITEM_DATABASE = pd.read_csv(os.path.join(data_path, 'Items_filtered.csv'))
 
 common_dict = {
     'scroll': 0.30,

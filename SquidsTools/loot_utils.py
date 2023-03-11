@@ -93,7 +93,10 @@ class Weapon:
     @classmethod
     def get_all_weapons(cls):
         if cls.WEAPON_DB is None:
-            df = pd.read_csv('data/Items.csv')
+            this_dir, this_filename = os.path.split(__file__)
+            data_path = os.path.join(this_dir, 'data')
+            df = pd.read_csv(os.path.join(data_path, 'Items.csv'))
+
             df = df[['weapon' in str(x) for x in df['Type'].to_numpy()]]
             weapons = [Weapon.create_weapon_from_row(row) for index, row in df.iterrows()]
 
@@ -202,7 +205,9 @@ class Money:
 
 
 # load monster database
-MONSTER_DB = pd.read_csv('data/Bestiary.csv')
+this_dir, this_filename = os.path.split(__file__)
+data_path = os.path.join(this_dir, 'data')
+MONSTER_DB = pd.read_csv(os.path.join(data_path, 'Bestiary.csv'))
 
 
 class Token:

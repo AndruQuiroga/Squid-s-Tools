@@ -1,10 +1,14 @@
 import glob
+import os
 import eel as eel
 import pandas as pd
 from SquidsTools.loot_utils import Weapon, Encounter, scan_token_for_weapons
 
-monster_df = pd.read_csv('data/Bestiary.csv')
-item_df = pd.read_csv('data/Items.csv')
+this_dir, this_filename = os.path.split(__file__)
+data_path = os.path.join(this_dir, 'data')
+
+monster_df = pd.read_csv(os.path.join(data_path, 'Bestiary.csv'))
+item_df = pd.read_csv(os.path.join(data_path, 'Items.csv'))
 
 
 @eel.expose
