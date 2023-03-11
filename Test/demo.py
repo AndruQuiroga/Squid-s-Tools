@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from SquidTools.loot_utils import Money
+from SquidsTools.loot_utils import Money
 
 r1 = np.random.randint(1, 21, 100000)
 r2 = np.random.randint(1, 21, 100000)
@@ -52,7 +52,7 @@ for i in range(len(bins) - 1):
     print(f"{labels[i]:<10s} {bins[i]:3.0f}-{bins[i + 1]:<3.0f}: {counts[i]:0.0%}")
 
 
-items_csv = pd.read_csv("../SquidTools/data/Items.csv")
+items_csv = pd.read_csv("../SquidsTools/data/Items.csv")
 mundane_items = items_csv[items_csv['Rarity'] == 'none']
 mundane_items = mundane_items[~mundane_items['Value'].isna()]
 
