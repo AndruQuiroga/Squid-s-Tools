@@ -17,17 +17,17 @@
     <h1>Squid's Tools</h1>
 </div>
 
-<div class="row">
+<div class="row dark">
     <div class="left-col dark2">
 
         <div class="dark2 light">
             <h5>Encounter List</h5>
-            <div class="openBtn">
-                <button onclick="openForm()"><strong>Create</strong></button>
-            </div>
+            <button class="button" style="width: 80%" onclick="openForm()"><strong>Create</strong></button>
+            <button class="button" style="width: 80%" onclick="openShopForm()"><strong>Shop</strong></button>
         </div>
 
         <div class="encounter_selection">
+
             <!--    <div class="encounter_block">Test</div>-->
             <!--    <div class="encounter_block">Test</div>-->
             <!--    <div class="encounter_block">Test</div>-->
@@ -77,6 +77,16 @@
     </div>
 </div>
 
+<div class="PopupContainer">
+    <div class="LootCreation" id="LootCreation">
+    </div>
+</div>
+
+<div class="PopupContainer">
+    <div class="ShopInventory" id="ShopInventory">
+    </div>
+</div>
+
 
 </body>
 
@@ -87,8 +97,11 @@
 <script>
 
     let selected_encounter_id = 0;
+    let selected_token_id = 0;
 
     $(document).ready(function () {
+
+        refresh_encounter_list();
 
         $(document).on('click', '.glyphicon-screenshot', function () {
             // get parent stat-block
@@ -122,11 +135,55 @@
 
         });
 
-        refresh_encounter_list()
+        // $(document).on('click', '.glyphicon-refresh', function () {
+        //     // ask user if they really want to do this
+        //     let token_block = $(this).parent().parent()
+        //     let token_name = token_block.find('.token_name').html()
+        //     let token_id = token_block.attr('id')
+        //
+        //     // encounter_id, token_id, item_id
+        //
+        // });
+
+        $(document).on('click', '.item_block', function () {
+            // ask user if they really want to do this
+            let item_disc = $(this).find('.item_desc')
+
+            if (item_disc.css('display') === 'block') {
+                item_disc.css('display', 'none')
+                return
+            }
+
+            if (item_disc.css('display') === 'none') {
+                item_disc.css('display', 'block')
+                return
+            }
+
+        });
+
+        $(document).on('click', '.weapon_block', function () {
+            // ask user if they really want to do this
+            let item_disc = $(this).find('.weapon_desc')
+
+            if (item_disc.css('display') === 'block') {
+                item_disc.css('display', 'none')
+                return
+            }
+
+            if (item_disc.css('display') === 'none') {
+                item_disc.css('display', 'block')
+                return
+            }
+
+        });
     });
 
     function refresh_encounter() {
         load_encounter(selected_encounter_id);
+    }
+
+    function refresh_stat_block() {
+        load_token_stat_block(selected_encounter_id, selected_token_id);
     }
 
     function load_encounter(encounter_id) {
@@ -137,8 +194,18 @@
     }
 
     function load_token_stat_block(encounter_id, token_id) {
+        selected_token_id = token_id;
         eel.load_token_stat_block(encounter_id, token_id)().then(function (result) {
             $('#stat_block').html(result)
+        });
+    }
+
+    function replace_item(encounter_id, token_id, item_id) {
+        console.log('replace_item')
+        eel.replace_item(encounter_id, token_id, item_id)().then(function (result) {
+            refresh_stat_block();
+            // refresh_encounter_list();
+            // refresh_encounter();
         });
     }
 
@@ -199,6 +266,45 @@
 
 </script>
 <script>
+
+    function openShopForm() {
+        eel.clear_shop_builder()().then(function (result) {
+            $('#ShopInventory').html(result)
+            document.getElementById("ShopInventory").style.display = "block";
+        });
+    }
+
+    function closeShopForm() {
+        document.getElementById("ShopInventory").style.display = "none";
+    }
+
+    function sendShopForm() {
+        let n_uncommon = document.getElementById("num_uncommon").value;
+        let n_common = document.getElementById("num_common").value;
+        let n_mundane = document.getElementById("num_mundane").value;
+        eel.create_shop_inventory(n_mundane, n_common, n_uncommon)().then(function (result) {
+        });
+        closeLootForm();
+    }
+
+    function openLootForm() {
+        eel.clear_loot_builder()().then(function (result) {
+            $('#LootCreation').html(result)
+            document.getElementById("LootCreation").style.display = "block";
+        });
+    }
+
+    function closeLootForm() {
+        document.getElementById("LootCreation").style.display = "none";
+    }
+
+    function sendLootForm() {
+        let loot_roll = document.getElementById("loot_roll_number").value;
+        let lootable_containers = document.getElementById("num_lootable").value;
+        eel.create_loot_table(loot_roll, lootable_containers)().then(function (result) {
+        });
+        closeLootForm();
+    }
 
     function openForm() {
         eel.clear_encounter_builder()().then(function (result) {

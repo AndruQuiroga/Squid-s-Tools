@@ -26,7 +26,6 @@
     $(document).ready(function () {
         let loot_table = document.getElementById("loot-table");
          eel.get_loot_table()().then(function (result) {
-            console.log(result);
             loot_table.innerHTML = result;
         });
 

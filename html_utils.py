@@ -1,7 +1,7 @@
 import glob
 import eel as eel
 import pandas as pd
-from loot_utils import Weapon, Encounter, scan_token_for_weapons
+from loot_utils import Weapon, Encounter, scan_token_for_weapons, Inventory
 
 monster_df = pd.read_csv('./data/Bestiary.csv')
 item_df = pd.read_csv('./data/Items.csv')
@@ -69,6 +69,89 @@ def clear_encounter_builder():
     """
 
 @eel.expose
+def clear_loot_builder():
+    return f"""
+    <form class="formContainer">
+
+            <div>
+                <span>Lootable Containers: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_lootable' type='number' value=0>
+                </span>
+            </div>
+            
+            <div>
+                <span>Player Loot Roll:</span>
+                <span>
+                    <input class='dark light text-seemless' id='loot_roll_number' type='number' value=0>
+                </span>
+            </div>
+
+            
+            <div>
+                <button type="button" class="btn cancel" onclick="closeLootForm()">Cancel</button>
+                <button type="button" class="btn cancel" onclick="sendLootForm()">Create</button>
+            </div>
+
+
+        </form>
+    """
+
+
+@eel.expose
+def clear_shop_builder():
+    return f"""
+    <form class="formContainer">
+
+            <div>
+                <span>Number Mundane: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_mundane' type='number' value=0>
+                </span>
+            </div>
+            
+            <div>
+                <span>Number Common: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_common' type='number' value=0>
+                </span>
+            </div>
+            
+            <div>
+                <span>Number Uncommon: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_uncommon' type='number' value=0>
+                </span>
+            </div>
+
+
+            <div>
+                <button type="button" class="btn cancel" onclick="closeShopForm()">Cancel</button>
+                <button type="button" class="btn cancel" onclick="sendShopForm()">Create</button>
+            </div>
+
+
+        </form>
+    """
+
+@eel.expose
+def create_shop_inventory(n_mundane, n_common, n_uncommon):
+    global loot_table
+    containers = []
+    for i in range(int(n_mundane)):
+        containers.append(Inventory.preroll(rarity='mundane'))
+    for i in range(int(n_common)):
+        containers.append(Inventory.preroll(rarity='common'))
+    for i in range(int(n_uncommon)):
+        containers.append(Inventory.preroll(rarity='uncommon'))
+
+    loot_table = ''.join([x.loot_block() for x in containers])
+    eel.start('loot.html', port=8001)
+
+
+
+
+@eel.expose
 def get_monster_list():
     print("Retrieving monster list")
     return [{"id": i, "text": x} for i, x in enumerate(monster_df['Name'])]
@@ -98,12 +181,21 @@ def add_monster_to_encounter_builder(js_arr):
     s += "</tr>"
     return s, get_weapon_list(token_weapons)
 
+loot_table = None
 
 @eel.expose
 def get_loot_table():
-    encounter = get_all_encounters()[0]
-    loot_table = encounter.generate_loot()
+    if loot_table is None:
+        return "No Encounter Loaded"
     return loot_table
+
+@eel.expose
+def create_loot_table(loot_roll, num_lootable):
+    global loot_table
+    if Current_Encounter is None:
+        return "No Encounter Loaded"
+    loot_table = Current_Encounter.generate_loot(loot_roll, num_lootable)
+    eel.start('loot.html', port=8001)
 
 @eel.expose
 def create_encounter(token_blueprint):
@@ -122,8 +214,15 @@ def encounter_selection_block(x):
     """
 
 
-Encounter_Object_List = None
 
+
+
+Encounter_Object_List = None
+Current_Encounter = None
+
+@eel.expose
+def get_cuurent_encounter():
+    return Current_Encounter
 
 def get_all_encounters(reload=False):
     global Encounter_Object_List
@@ -140,11 +239,20 @@ def get_encounter_list():
 
 @eel.expose
 def load_encounter(encounter_id):
+    global Current_Encounter
     # find the encounter in Ecounter_Object_List
     encounter = [x for x in get_all_encounters() if x.id == encounter_id][0]
+    Current_Encounter = encounter
     encounter.sort_tokens()
+    buttons = ["""
+    <div class='button_wrap'>
+    <button class="button" onclick="open_add_token_form()"><strong>Add Token</strong></button>
+    <button class="button" onclick="openLootForm()"><strong>Loot Table</strong></button>
+    </div>
+    """]
     encounter_blocks = [token.token_block() for token in encounter.tokens]
-    return ''.join(encounter_blocks)
+    all = buttons + encounter_blocks
+    return ''.join(all)
 
 
 @eel.expose
@@ -188,6 +296,13 @@ def change_t_hp(encounter_id, token_id, value):
     token.hit_points = int(value)
     encounter.save()
 
+@eel.expose
+def replace_item(encounter_id, token_id, item_id):
+    encounter = [x for x in get_all_encounters() if x.id == encounter_id][0]
+    token = [x for x in encounter.tokens if x.id == token_id][0]
+    item = [x for x in token.inventory.items if x.id == item_id][0]
+    token.inventory.replace_item(item)
+    encounter.save()
 
 @eel.expose
 def delete_token(encounter_id, token_id):

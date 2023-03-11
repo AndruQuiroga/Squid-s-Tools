@@ -12,16 +12,19 @@ h1 {
 
 .loot-table {
     /*center the contents*/
-    width: 80%;
-    margin: auto;
-    /*display: flex;*/
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+
     /*padding: 10px;*/
 
 }
 
 .loot-block {
     background-color: #635985;
-    white-space: pre-line;
+    /*white-space: pre-line;*/
     border-radius: 5px;
     color: white;
     text-align: center;
@@ -50,8 +53,10 @@ h1 {
   display: flex;
 }
 
-body {
+html, body {
     background-color: #18122B;
+    height: 400px;
+    min-height: 100%;
 }
 
 .dark {
@@ -87,17 +92,19 @@ body {
     margin: auto;
     /*margin: 5px;*/
     padding: 10px;
+
+    flex: 10%;
+    height: 400px;
+
+    overflow-y:auto;
+    position:relative;
 }
 
 .encounter_selection {
-    flex: 10%;
-    height: 500px;
     padding: 5px 5px;
     /*margin: 5px 0px 5px -30px;*/
     border-radius: 5px;
 
-    overflow-y:auto;
-    position:relative;
 }
 
 .encounter_block {
@@ -111,7 +118,7 @@ body {
 
 .selected_encounter {
     flex: 20%;
-    height: 500px;
+    height: 400px;
     background-color: #18122B;
     padding: 5px 10px 0px 5px;
     /*border-radius: 25px;*/
@@ -140,6 +147,7 @@ body {
 
 .stat_block {
     flex: 60%;
+    height: 400px;
     padding: 10px;
     color: white;
     background-color: #1F1D36;
@@ -183,6 +191,58 @@ body {
     color:#A73335;
 }
 
+.weapon_block {
+    font-size: 80%;
+    background-color: #635985;
+    border-radius: 10px;
+    flex: auto;
+    /*text-align: center;*/
+    font-weight:bold;
+    /*width: 70%;*/
+    margin: 5px 15%;
+    color: white;
+}
+
+.weapon_stats {
+    font-size: 100%;
+    font-style: italic;
+    margin: -10px 20px 0px 20px;
+    /*padding: 5px;*/
+    white-space: pre-line;
+    text-align: left;
+}
+
+.weapon_desc {
+    display: none;
+    font-size: 75%;
+    font-style: italic;
+    margin: -10px 20px 0px 20px;
+    /*padding: 5px;*/
+    white-space: pre-line;
+    text-align: left;
+}
+
+.item_block {
+    background-color: #635985;
+    border-radius: 10px;
+    flex: auto;
+    text-align: center;
+    width: 70%;
+    /*height: 70px;*/
+    margin: 5px 15%;
+    color: white;
+}
+
+.item_desc {
+    display: none;
+    font-size: 75%;
+    font-style: italic;
+    margin: -10px 20px 0px 20px;
+    /*padding: 5px;*/
+    white-space: pre-line;
+    text-align: left;
+}
+
 th, td {
     width:200px;
     text-align:center;
@@ -217,9 +277,19 @@ th, td {
     margin: 5px;
 }
 
-.openBtn {
-        display: flex;
-        justify-content: left;
+.button_wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.button {
+    color: white;
+    background-color: #301E67;
+    height: 30px;
+    width: 40%;
+    font-size: 50%;
+
 }
 .openButton {
 border: none;
@@ -246,6 +316,27 @@ transform: translate(-50%, 5%);
 border: 3px solid #999999;
 z-index: 9;
 }
+
+.LootCreation {
+display: none;
+position: fixed;
+left: 45%;
+top: 5%;
+transform: translate(-50%, 5%);
+border: 3px solid #999999;
+z-index: 9;
+}
+
+.ShopInventory {
+display: none;
+position: fixed;
+left: 45%;
+top: 5%;
+transform: translate(-50%, 5%);
+border: 3px solid #999999;
+z-index: 9;
+}
+
 .formContainer {
 max-width: 1200px;
 padding: 20px;

@@ -7,19 +7,19 @@ import pandas as pd
 ITEM_DATABASE = pd.read_csv('data/Items_filtered.csv')
 
 common_dict = {
-    'scroll': 0.20,
-    'potion': 0.20,
-    'other_magic': 0.50,
-    'other_mundane': 0.10,
+    'scroll': 0.30,
+    'potion': 0.55,
+    'other_magic': 0.10,
+    'other_mundane': 0.05,
 }
 
 uncommon_dict = {
-        '+1 Weapon': 0.20,
-        'Unique Weapon/Armor': 0.20,
-        'scroll': 0.20,
-        'potion': 0.20,
-        'other_magic': 0.10,
-        'other_mundane': 0.10,
+        '+1 Weapon': 0.30,
+        'Unique Weapon/Armor': 0.02,
+        'scroll': 0.22,
+        'potion': 0.26,
+        'other_magic': 0.17,
+        'other_mundane': 0.03,
     }
 
 

@@ -5,5 +5,5 @@ from html_utils import *
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
 eel.init('web', allowed_extensions=['.js', '.html'])
 
-# eel.start('index.html')
-eel.start('loot.html')
+eel.start('index.html')
+# eel.start('loot.html')

@@ -9,6 +9,18 @@ from generate_loot import preroll_item
 
 
 # from html_utils import create_html_stat_block
+class Item:
+
+    def __init__(self, name, item_type, rarity, value, weight, description):
+        self.name = name
+        self.item_type = item_type
+        self.value = value
+        self.rarity = rarity
+        self.weight = weight
+        self.description = description
+        self.info = None
+        self.id = str(uuid.uuid4())
+
 
 def scan_token_for_weapons(token_actions):
     weapon_names = [w.name for w in Weapon.get_all_weapons()]
@@ -53,6 +65,8 @@ class Weapon:
         self.weight = weight
         self.value = value
         self.rarity = rarity
+        if self.rarity == 'none':
+            self.rarity = 'mundane'
         self.properties = properties
         self.description = description
         self.ranged = 'range' in weapon_type
@@ -198,6 +212,10 @@ class Token:
                  life_style=None,
                  lootable=True):
 
+        if token_name == '':
+            self.name = 'Container'
+            return
+
         self.encounter = encounter
         self.id = str(uuid.uuid4())
         self.name = token_name
@@ -276,23 +294,75 @@ class Token:
         """
 
     def get_weapon_blocks(self):
-        s = ''
+        if len(self.inventory.weapons) == 0:
+            return ''
+
+        s = '<div class="actions">Weapons</div>'
         for weapon in self.inventory.weapons:
-            to_hit_mod = self.modifiers['strength_mod'] if 'finesse' not in weapon.properties \
-                else self.modifiers['dexterity_mod']
+            if 'finesse' in weapon.properties:
+                to_hit_mod = self.modifiers['dexterity_mod']
+            elif weapon.ranged:
+                to_hit_mod = self.modifiers['dexterity_mod']
+            else:
+                to_hit_mod = self.modifiers['strength_mod']
+
+            damage_mod = to_hit_mod
             to_hit_mod += self.proficiency_bonus
 
-            damage_mod = self.modifiers['strength_mod'] if 'finesse' not in weapon.properties \
-                else self.modifiers['dexterity_mod']
+            if 'reach' in weapon.properties:
+                reach = 10
+            elif weapon.ranged:
+                reach = weapon.properties[0]
+            else:
+                reach = 5
 
             s += f"""
-            <div class="weapon_block dark1 light stat_small">
-                <span>{weapon.name}</span>
-                <span>Reach: {'5ft' if 'reach' not in weapon.properties else '10ft'}</span>
-                <span>To Hit: +{to_hit_mod}</span>
-                <span>Damage: {weapon.damage}+{damage_mod} {weapon.damage_type}</span>
+            <div class="weapon_block dark1 light">
+                <div style="margin: 20px 10px -5px 10px;">
+                {weapon.name} ({weapon.rarity})
+                </div>
+                
+                <div class="weapon_stats">
+                    Reach: {reach}
+                    To Hit: +{to_hit_mod}
+                    Damage: {weapon.damage}+{damage_mod} {weapon.damage_type}
+                </div>
+                
+                <div class="weapon_desc">
+                    Weight: {weapon.weight}
+                    Value: {weapon.value}
+                    Description: {weapon.description}
+                </div>
+            
             </div>
             """
+
+        s += '<div class="gradient"></div>'
+        return s
+
+    def get_item_blocks(self):
+        if len(self.inventory.items) == 0:
+            return ''
+
+        s = '<div class="actions">Items</div>'
+        for item in self.inventory.items:
+            s += f"""
+            <div class="item_block dark1 light">
+                <div style="font-size: 125%">
+                <span>{item.name} ({item.rarity})</span>
+                <span class='glyphicon glyphicon-refresh al-right' 
+                onclick="replace_item('{self.encounter.id}', '{self.id}', '{item.id}')"></span>
+                </div>
+                <div class="item_desc">
+                    Type: {item.item_type}
+                    Weight: {item.weight}
+                    Value: {item.value}
+                    Description: {item.description}
+                </div>
+            </div>
+            """
+
+        s += '<div class="gradient"></div>'
         return s
 
     def get_token_stat_block(self):
@@ -338,9 +408,10 @@ class Token:
             <div class="actions">Actions</div>
             <p>{self.info['Actions']}</p>
             <div class="gradient"></div>
-            <div class="actions">Weapons</div>
+            
             {self.get_weapon_blocks()}
-            <div class="gradient"></div>
+            
+            {self.get_item_blocks()}
 
             </div>
             """
@@ -417,6 +488,11 @@ class Encounter:
                     tokens.append(Player(self, f'Player {i + 1}'))
                 continue
 
+            if token['name'] == 'Shelve':
+                for i in range(token['minion_count']):
+                    tokens.append(Player(self, f'Player {i + 1}'))
+                continue
+
             for i in range(token['boss_count']):
                 tokens.append(Token(self, token['name'], boss=True, weapons=token['weapons']))
             for i in range(token['minion_count']):
@@ -429,21 +505,18 @@ class Encounter:
         <div class="encounter_block">{self.name}</div>
         """
 
-    def generate_loot(self):
-        s = ''
-        lootable_tokens = [token for token in self.tokens if token.lootable]
-        # find the lowest square root of the number of tokens
-        # this will be the number of columns
-        # the number of rows will be the number of tokens divided by the number of columns
-        # if the number of tokens is not a perfect square, the last row will have fewer columns
-        cols = int(np.sqrt(len(lootable_tokens)))
-        rows = len(lootable_tokens) // cols
+    def generate_loot(self, loot_roll, num_lootable):
+        loot_roll = int(loot_roll)
+        num_lootable = int(num_lootable)
 
-        for i in range(rows):
-            s += '<div class="row">'
-            for j in range(cols):
-                if i * cols + j < len(lootable_tokens):
-                    s += lootable_tokens[i * cols + j].inventory.loot_block()
+        s = ''
+        lootable = [token.inventory for token in self.tokens if token.lootable]
+        for _ in range(num_lootable):
+            lootable.append(Inventory.preroll())
+
+        for i in range(len(lootable)):
+            s += '<div>'
+            s += lootable[i].loot_block()
             s += '</div>'
 
         return s
@@ -479,9 +552,19 @@ class Encounter:
 class Inventory:
     def __init__(self, token=None, weapons=None):
         if token is None:
+            self.token = Token()
+            self.money = Money()
+            self.weapons = []
+            self.armor = []
+            self.items = []
             return
 
         if not token.lootable:
+            self.token = token
+            self.money = Money()
+            self.weapons = []
+            self.armor = []
+            self.items = []
             return
 
         print("WEAPONS: ", weapons)
@@ -494,33 +577,72 @@ class Inventory:
 
         self.generate_loot()
 
-    def generate_loot(self):
-        item_spawn_chance = 0.25 if not self.token.boss else 1.00
+    def generate_loot(self, item_rarity=None, item_spawn_chance=None):
+        if item_spawn_chance is None:
+            item_spawn_chance = 0.20 if not self.token.boss else 1.00
 
         if np.random.random() < item_spawn_chance:
 
             rarity_dict = {
-                "mundane":  0.50,
-                "common":   0.30,
-                "uncommon": 0.20,
+                "mundane":  0.70,
+                "common":   0.25,
+                "uncommon": 0.05,
             }
 
-            item_rarity = np.random.choice(list(rarity_dict.keys()), p=list(rarity_dict.values()))
+            if item_rarity is None:
+                item_rarity = np.random.choice(list(rarity_dict.keys()), p=list(rarity_dict.values()))
+
             item = preroll_item(item_rarity)
-            item = f"({item_rarity}) {item['Name']}"
+            item = Item(item['Name'], item['Type'], item_rarity, item['Value'], item['Weight'], item['Text'])
+
+            # item = f"({item_rarity}) {item['Name']}"
             self.items.append(item)
 
         pass
 
+    def replace_item(self, old_item):
+        item_rarity = old_item.rarity
+        item = preroll_item(item_rarity)
+        new_item = Item(item['Name'], item['Type'], item_rarity, item['Value'], item['Weight'], item['Text'])
+
+        print("REPLACING ITEM: ", old_item, new_item)
+        index = self.items.index(old_item)
+        self.items[index] = new_item
+
+    @staticmethod
+    def preroll(rarity=None):
+        tmp = Inventory()
+        tmp.generate_loot(item_rarity=rarity, item_spawn_chance=1.00)
+        print("HERE", tmp.items[0].name)
+        return tmp
+
     def loot_block(self):
         print(self.items)
+
+        money = str(self.money)
+        weapons = ', '.join([str(w) for w in self.weapons])
+        armor = ', '.join([str(w) for w in self.armor])
+        items = ', '.join([w.name for w in self.items])
+
+        if money != '0cp':
+            money = f'<div> Money: {money:>10} </div>'
+        else:
+            money = ''
+
+        if weapons != '':
+            weapons = f'<div> Weapons: {weapons} </div>'
+        if armor != '':
+            armor = f'<div> Armor: {armor} </div>'
+        if items != '':
+            items = f'<div> Items: {items} </div>'
+
         return f"""
         <div class="loot-block">
         <div style='font-size: 200%;'>{self.token.name}</div>
-            Money: {str(self.money):>10}
-            Weapons: {', '.join([str(w) for w in self.weapons]):>10}
-            Armor: {', '.join([str(w) for w in self.armor]):>10}
-            Items: {', '.join([str(w) for w in self.items]):>10}
+        {money}
+        {weapons}
+        {armor}
+        {items}
         </div>
         """
 
