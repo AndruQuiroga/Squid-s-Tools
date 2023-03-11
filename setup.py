@@ -14,5 +14,5 @@ setup(
     author='Dreski',
     author_email='',
     description='',
-    install_requires=['numpy', 'pandas', 'eel'],
+    install_requires=['setuptools-git', 'numpy', 'pandas', 'eel'],
 )
