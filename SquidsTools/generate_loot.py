@@ -123,7 +123,7 @@ def create_mundane_datasets():
     # to csv
     mundane_items.to_csv('data/uncommon_mundane_items.csv', index=False)
 
-create_mundane_datasets()
+# create_mundane_datasets()
 
 # class Loot:
 #
