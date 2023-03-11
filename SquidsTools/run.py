@@ -1,5 +1,5 @@
 import os
-import eel
+from html_utils import *
 
 
 def main():
