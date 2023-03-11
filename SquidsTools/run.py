@@ -1,6 +1,12 @@
+import os
 import eel
 
 
 def main():
-    eel.init('./web', allowed_extensions=['.js', '.html'])
+    this_dir, this_filename = os.path.split(__file__)
+    path = os.path.join(this_dir, 'web')
+    eel.init(path, allowed_extensions=['.js', '.html'])
     eel.start('index.html')
+
+if __name__ == '__main__':
+    main()
