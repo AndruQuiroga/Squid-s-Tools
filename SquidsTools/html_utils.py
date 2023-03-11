@@ -1,7 +1,7 @@
 import glob
 import eel as eel
 import pandas as pd
-from loot_utils import Weapon, Encounter, scan_token_for_weapons
+from SquidsTools.loot_utils import Weapon, Encounter, scan_token_for_weapons
 
 monster_df = pd.read_csv('data/Bestiary.csv')
 item_df = pd.read_csv('data/Items.csv')

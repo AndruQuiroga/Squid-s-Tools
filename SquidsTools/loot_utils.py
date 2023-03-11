@@ -1,11 +1,11 @@
 import os
 import pickle
 import uuid
-from enum import Enum
 import pandas as pd
 import numpy as np
 
-from generate_loot import preroll_item
+from SquidsTools.generate_loot import preroll_item
+from enum import Enum
 
 
 # from html_utils import create_html_stat_block

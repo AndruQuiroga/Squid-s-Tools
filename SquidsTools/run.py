@@ -1,5 +1,5 @@
 import os
-from html_utils import *
+from SquidsTools.html_utils import *
 
 
 def main():
