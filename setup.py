@@ -7,12 +7,13 @@ setup(
     packages=['SquidsTools'],
     package_data={
         # If any package contains *.txt or *.rst files, include them:
-        '': ['*.txt', '*.html', '*.css', '*.js', '*.csv'],
+        'SquidsTools': ['web/*.html', 'web/css/*.css',
+                        'web/js/*.js', 'data/*.csv'],
     },
     url='https://github.com/AndruQuiroga/Squid-s-Tools',
     license='',
     author='Dreski',
     author_email='',
     description='',
-    install_requires=['setuptools-git', 'numpy', 'pandas', 'eel'],
+    install_requires=['numpy', 'pandas', 'eel'],
 )
