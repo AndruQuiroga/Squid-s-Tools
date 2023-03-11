@@ -5,6 +5,9 @@ import pandas as pd
 this_dir, this_filename = os.path.split(__file__)
 data_path = os.path.join(this_dir, 'data')
 ITEM_DATABASE = pd.read_csv(os.path.join(data_path, 'Items_filtered.csv'))
+mundane_items = pd.read_csv(os.path.join(data_path, 'mundane_items.csv'))
+common_mundane_items = pd.read_csv(os.path.join(data_path, 'common_mundane_items.csv'))
+uncommon_mundane_items = pd.read_csv(os.path.join(data_path, 'uncommon_mundane_items.csv'))
 
 common_dict = {
     'scroll': 0.30,
@@ -31,15 +34,12 @@ def preroll_item(item_rarity):
     """
 
     if item_rarity == 'mundane':
-        mundane_items = pd.read_csv('data/mundane_items.csv')
         item = mundane_items.sample(1)
         return item.iloc[0]
 
     if item_rarity == 'common':
 
         common_items = ITEM_DATABASE[ITEM_DATABASE['Rarity'] == 'common']
-        common_mundane_items = pd.read_csv('data/common_mundane_items.csv')
-
         # types of common items to choose from are [scroll, potion, other]
         item_type = np.random.choice(list(common_dict.keys()), p=list(common_dict.values()))
 
@@ -56,23 +56,21 @@ def preroll_item(item_rarity):
 
     if item_rarity == 'uncommon':
 
-        common_items = ITEM_DATABASE[ITEM_DATABASE['Rarity'] == 'uncommon']
-        common_mundane_items = pd.read_csv('data/uncommon_mundane_items.csv')
-
+        uncommon_items = ITEM_DATABASE[ITEM_DATABASE['Rarity'] == 'uncommon']
         item_type = np.random.choice(list(uncommon_dict.keys()), p=list(uncommon_dict.values()))
 
         if item_type == '+1 Weapon':
-            item = common_items[common_items['Name'] == '+1 Weapon']
+            item = uncommon_items[uncommon_items['Name'] == '+1 Weapon']
         elif item_type == 'Unique Weapon/Armor':
-            item = common_items[common_items['Type'].str.contains('generic')].sample(1)
+            item = uncommon_items[uncommon_items['Type'].str.contains('generic')].sample(1)
         elif item_type == 'Scroll':
-            item = common_items[common_items['Type'] == 'scroll'].sample(1)
+            item = uncommon_items[uncommon_items['Type'] == 'scroll'].sample(1)
         elif item_type == 'Potion':
-            item = common_items[common_items['Type'] == 'potion'].sample(1)
+            item = uncommon_items[uncommon_items['Type'] == 'potion'].sample(1)
         elif item_type == 'Other_Magic':
-            item = common_items[~common_items['Type'].str.contains('potion|scroll|generic')].sample(1)
+            item = uncommon_items[~uncommon_items['Type'].str.contains('potion|scroll|generic')].sample(1)
         else:
-            item = common_mundane_items.sample(1)
+            item = uncommon_mundane_items.sample(1)
 
         return item.iloc[0]
 

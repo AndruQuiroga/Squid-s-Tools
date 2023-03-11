@@ -303,7 +303,10 @@ def get_current_encounter():
 def get_all_encounters(reload=False):
     global Encounter_Object_List
     if Encounter_Object_List is None or reload:
-        Encounter_Object_List = [Encounter.load(file) for file in glob.glob('saves/*.encounter')]
+        this_dir, this_filename = os.path.split(__file__)
+        save_path = os.path.join(this_dir, 'saves')
+        file_path = os.path.join(save_path, '*.encounter')
+        Encounter_Object_List = [Encounter.load(file) for file in glob.glob(file_path)]
 
     return Encounter_Object_List
 

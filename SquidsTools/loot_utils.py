@@ -615,13 +615,20 @@ class Encounter:
         return s
 
     def save(self):
-        if not os.path.exists('saves'):
-            os.makedirs('saves')
-        with open(f'saves/{self.name}.encounter', 'wb') as f:
+        this_dir, this_filename = os.path.split(__file__)
+        save_path = os.path.join(this_dir, 'saves')
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
+        file_path = os.path.join(save_path, f'{self.name}.encounter')
+        with open(file_path, 'wb') as f:
             pickle.dump(self, f)
 
     def delete(self):
-        os.remove(f'saves/{self.name}.encounter')
+        this_dir, this_filename = os.path.split(__file__)
+        save_path = os.path.join(this_dir, 'saves')
+        file_path = os.path.join(save_path, f'{self.name}.encounter')
+        os.remove(file_path)
 
     @staticmethod
     def load(file_path):
