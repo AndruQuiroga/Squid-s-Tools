@@ -638,9 +638,11 @@ class Encounter:
     @staticmethod
     def check_name_uniqueness(name):
         # if name exists, add a number to the end
-        if os.path.exists(f'saves/{name}.encounter'):
+        this_dir, this_filename = os.path.split(__file__)
+        save_path = os.path.join(this_dir, 'saves')
+        if os.path.exists(os.path.join(save_path, f'{name}.encounter')):
             i = 1
-            while os.path.exists(f'saves/{name} ({i}).encounter'):
+            while os.path.exists(os.path.join(save_path, f'{name} ({i}).encounter')):
                 i += 1
             name = f'{name} ({i})'
         return name
