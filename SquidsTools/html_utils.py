@@ -19,7 +19,7 @@ def clear_encounter_builder():
             <div>
                 <span>Monster Name: </span>
                 <span>
-                    <select class="monster-selection">
+                    <select class="monster-selection" id="builder-monster-selection">
                         <option value="">Select a Monster..</option>
                     </select>
                 </span>
@@ -81,7 +81,7 @@ def clear_add_token_builder():
             <div>
                 <span>Monster Name: </span>
                 <span>
-                    <select class="monster-selection">
+                    <select class="monster-selection" id='add-monster-selection'>
                         <option value="">Select a Monster..</option>
                     </select>
                 </span>
@@ -190,6 +190,34 @@ def clear_shop_builder():
                     <input class='dark light text-seemless' id='num_uncommon' type='number' value=0>
                 </span>
             </div>
+            
+            <div>
+                <span>Number Common Spells: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_scommon' type='number' value=0>
+                </span>
+            </div>
+            
+            <div>
+                <span>Number Uncommon Spells: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_suncommon' type='number' value=0>
+                </span>
+            </div>
+            
+            <div>
+                <span>Number Common Potions: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_pcommon' type='number' value=0>
+                </span>
+            </div>
+            
+            <div>
+                <span>Number Uncommon Potions: </span>
+                <span>
+                    <input class='dark light text-seemless' id='num_puncommon' type='number' value=0>
+                </span>
+            </div>
 
 
             <div>
@@ -203,12 +231,16 @@ def clear_shop_builder():
 
 
 @eel.expose
-def create_shop_inventory(n_mundane, n_common, n_uncommon):
+def create_shop_inventory(n_mundane, n_common, n_uncommon, n_scommon, n_suncommon, n_pcommon, n_puncommon):
     global loot_table
     containers = []
     containers.append({"name": "Mundane Item", "minion_count": int(n_mundane)})
     containers.append({"name": "Common Item", "minion_count": int(n_common)})
     containers.append({"name": "Uncommon Item", "minion_count": int(n_uncommon)})
+    containers.append({"name": "Common Scroll", "minion_count": int(n_scommon)})
+    containers.append({"name": "Uncommon Scroll", "minion_count": int(n_suncommon)})
+    containers.append({"name": "Common Potion", "minion_count": int(n_pcommon)})
+    containers.append({"name": "Uncommon Potion", "minion_count": int(n_puncommon)})
 
     encounter = Encounter(containers, name="Shop")
     print("CREATED SHOP ENCOUNTER")
@@ -239,7 +271,7 @@ def add_monster_to_encounter_builder(js_arr):
     s += f"<td><select class=\"weapon-selection\"multiple=\"multiple\"></select></td>"
     s += f"<td><input type='number' value=0></td>"
     s += f"<td><input type='number' value=0></td>"
-    s += "<td><input type=\"checkbox\"></td>"
+    s += "<td><input type=\"checkbox\" checked></td>"
     s += "<td><button type=\"button\" class=\"remove_btn\"'>Remove</button></td>"
     s += "</tr>"
     return s, get_weapon_list(token_weapons)
@@ -324,6 +356,7 @@ def load_encounter(encounter_id):
     Current_Encounter = encounter
     encounter.sort_tokens()
     buttons = [f"""
+    <div class="selected_encounter">
     <div class='button_wrap'>
     <input class="encounter_name dark text-seemless" id='ename{encounter.id}_1' type='text' onchange=
     "change_e_name('{encounter.id}', 'ename{encounter.id}_1', null)" value='{encounter.name}'>
@@ -335,7 +368,14 @@ def load_encounter(encounter_id):
     </div>
     """]
     encounter_blocks = [token.token_block() for token in encounter.tokens]
-    all = buttons + encounter_blocks
+    bottem_buttons = [f"""
+    </div>
+    <div class='al-right'>
+    <button class="button" style='width: 50px;' onclick="rehighlight_token()"><strong>Return</strong></button>
+    <button class="button" style='width: 50px;' onclick="highlight_token(get_next_token_id())"><strong>Next</strong></button>
+    </div>
+        """]
+    all = buttons + encounter_blocks + bottem_buttons
     return ''.join(all)
 
 

@@ -153,13 +153,21 @@ html, body {
     margin: 10px 5px;
 }
 
-.selected_encounter {
+.selected_encounter_container {
     flex: 20%;
     height: 400px;
     background-color: #18122B;
     padding: 5px 10px 0px 5px;
     /*border-radius: 25px;*/
     margin: 10px 0px 0px 0px;
+}
+
+.highlighted {
+    border: white 2px solid;
+}
+
+.selected_encounter {
+    height: 380px;
     overflow-y:auto;
     position:relative;
 }

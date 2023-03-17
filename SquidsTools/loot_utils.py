@@ -1,5 +1,6 @@
 import os
 import pickle
+import re
 import uuid
 import pandas as pd
 import numpy as np
@@ -9,6 +10,10 @@ from enum import Enum
 
 
 # from html_utils import create_html_stat_block
+this_dir, this_filename = os.path.split(__file__)
+data_path = os.path.join(this_dir, 'data', 'Spells.csv')
+spells = pd.read_csv(data_path)
+# Spell Scroll (1st Level)
 class Item:
 
     def __init__(self, name, item_type, rarity, value, weight, description):
@@ -21,6 +26,15 @@ class Item:
         self.info = None
         self.id = str(uuid.uuid4())
 
+        if 'Spell Scroll' in self.name:
+            scroll_level = self.name.split(' ')[2]
+            scroll_level = scroll_level.split(' ')[0][1:]
+            if scroll_level == 'Cantrip)':
+                scroll_level = scroll_level[:-1]
+
+            spell = spells[spells['Level'] == scroll_level].sample(1)
+            self.name = f'Spell Scroll: {spell["Name"].to_numpy()[0]} ({scroll_level})'
+            self.description = spell["Text"].to_numpy()[0]
 
 def scan_token_for_weapons(token_actions):
     if isinstance(token_actions, float):
@@ -52,27 +66,71 @@ class Weapon:
     WEAPON_DB = None
 
     def __init__(self, name,
-                 damage,
-                 damage_type,
-                 weapon_type,
-                 weight,
-                 value,
-                 rarity,
-                 properties,
-                 description):
+                 attack_type=None,
+                 base_damage=None,
+                 total_damage=None,
+                 damage_type=None,
+                 weapon_types=(),
+                 weight="N/A",
+                 value="N/A",
+                 rarity="",
+                 properties=(),
+                 description="N/A",
+                 hit_mod=None,
+                 reach=None,
+                 targets=None,
+                 from_stat_block=False):
 
         self.name = name
-        self.damage = damage
+        self.base_damage = base_damage
+        self.total_damage = total_damage
         self.damage_type = damage_type
-        self.weapon_type = weapon_type
+        self.weapon_types = weapon_types
         self.weight = weight
         self.value = value
         self.rarity = rarity
-        if self.rarity == 'none':
-            self.rarity = 'mundane'
         self.properties = properties
         self.description = description
-        self.ranged = 'range' in weapon_type
+        self.hit_mod = hit_mod
+        self.reach = reach
+        self.targets = targets
+        self.lootable = not from_stat_block
+        self.from_stat_block = from_stat_block
+        self.properties = properties
+        self.description = description
+
+        if self.from_stat_block:
+            self.check_weapon_database()
+        if self.rarity == 'none':
+            self.rarity = 'mundane'
+
+        self.ranged = 'range' in weapon_types
+
+        print(properties)
+        self.versatile_damage = ""
+        for prop in properties:
+            if 'versatile' in prop:
+                print(prop)
+                self.versatile_damage = prop.split(' ')[1]
+
+                break
+
+    def __str__(self):
+        return f"{self.name} ({self.base_damage}{self.damage_type})"
+
+    def check_weapon_database(self):
+        weapon = [w for w in Weapon.get_all_weapons() if w.name == self.name]
+        if len(weapon) == 0:
+            return
+        weapon = weapon[0]
+        self.weapon_types = weapon.weapon_types
+        self.weight = weapon.weight
+        self.value = weapon.value
+        self.rarity = weapon.rarity
+        self.properties = weapon.properties
+        self.description = weapon.description
+        self.lootable = True
+
 
     @staticmethod
     def create_weapon_from_id(id):
@@ -87,8 +145,16 @@ class Weapon:
         if '-' in row['Properties']:
             properties = row['Properties'].split('-')[1][1:]
             properties = properties.split(', ')
-        return Weapon(row['Name'], damage, damage_type, row['Type'],
-                      row['Weight'], row['Value'], row['Rarity'], properties, row['Text'])
+        return Weapon(
+            name=row['Name'],
+            base_damage=damage,
+            damage_type=damage_type,
+            weapon_types=row['Type'],
+            weight=row['Weight'],
+            value=row['Value'],
+            rarity=row['Rarity'],
+            properties=properties,
+            description=row['Text'])
 
     @classmethod
     def get_all_weapons(cls):
@@ -102,9 +168,6 @@ class Weapon:
 
             cls.WEAPON_DB = weapons
         return cls.WEAPON_DB
-
-    def __str__(self):
-        return f"{self.name} ({self.damage} {self.damage_type})"
 
 
 class Money:
@@ -234,7 +297,7 @@ class Token:
 
         self.hit_points = -1
         self.initiative = -1
-        self.inventory = Inventory(self, weapons=weapons)
+        self.inventory = Inventory(self)
 
         if "Item" in self.name:
             return
@@ -251,6 +314,40 @@ class Token:
             return None
 
         self.info = monster.iloc[0].to_dict()
+        actions = self.info['Actions']
+        regex = "([^.\"\n]+)\.\s((Melee Weapon Attack:)|(Ranged Weapon Attack:)|" \
+                "(Melee or Ranged Weapon Attack:))\s([^,]+)\,([^,]+)\,([^.]+)\.([^.]+)\."
+        x = re.findall(regex, actions)
+        weapons = [x for x in x]
+        new_actions = re.sub(regex, '', actions)
+        self.info['Actions'] = new_actions
+
+        for weapon in weapons:
+            # (' Talon', 'Melee Weapon Attack:', 'Melee Weapon Attack:', '', '', '+4 to hit', ' reach 5 ft.',
+            #  ' one target', ' Hit: 4 (1d4 + 2) slashing damage')
+            name = weapon[0][1:]
+            attack_type = weapon[1][:-1]
+            hit_mod = weapon[5].split(' ')[0][1:]
+            reach = weapon[6][7:]
+            targets = weapon[7][1:]
+            damage = weapon[8]
+            damage_type = damage.split(' ')[-2]
+            damage = damage.split('(')[1]
+            damage = damage.split(')')[0]
+
+            w = Weapon(
+                name=name,
+                attack_type=attack_type,
+                hit_mod=hit_mod,
+                reach=reach,
+                targets=targets,
+                total_damage=damage,
+                damage_type=damage_type,
+                from_stat_block=True
+            )
+
+            self.inventory.weapons.append(w)
+
 
     def define_modifiers(self):
         self.modifiers = {}
@@ -311,22 +408,29 @@ class Token:
 
         s = '<div class="actions">Weapons</div>'
         for weapon in self.inventory.weapons:
-            if 'finesse' in weapon.properties:
-                to_hit_mod = self.modifiers['dexterity_mod']
-            elif weapon.ranged:
-                to_hit_mod = self.modifiers['dexterity_mod']
-            else:
-                to_hit_mod = self.modifiers['strength_mod']
 
-            damage_mod = to_hit_mod
-            to_hit_mod += self.proficiency_bonus
-
-            if 'reach' in weapon.properties:
-                reach = 10
-            elif weapon.ranged:
-                reach = weapon.properties[0]
+            if weapon.from_stat_block:
+                to_hit_mod = weapon.hit_mod
+                damage = weapon.total_damage
+                reach = weapon.reach
             else:
-                reach = 5
+                if 'finesse' in weapon.properties:
+                    to_hit_mod = max([self.modifiers['dexterity_mod'], self.modifiers['strength_mod']])
+                elif weapon.ranged:
+                    to_hit_mod = self.modifiers['dexterity_mod']
+                else:
+                    to_hit_mod = self.modifiers['strength_mod']
+
+                damage_mod = to_hit_mod
+                to_hit_mod += self.proficiency_bonus
+                damage = f"{weapon.base_damage} + {damage_mod}"
+
+                if 'reach' in weapon.properties:
+                    reach = 10
+                elif weapon.ranged:
+                    reach = weapon.properties[0]
+                else:
+                    reach = 5
 
             s += f"""
             <div class="weapon_block dark1 light">
@@ -337,7 +441,7 @@ class Token:
                 <div class="weapon_stats">
                     Reach: {reach}
                     To Hit: +{to_hit_mod}
-                    Damage: {weapon.damage}+{damage_mod} {weapon.damage_type}
+                    Damage: {damage} {weapon.versatile_damage} {weapon.damage_type}
                 </div>
                 
                 <div class="weapon_desc">
@@ -368,6 +472,22 @@ class Token:
             s += f"<div><span class='bold'>{trait}</span><span> {self.info[trait]}</span></div>"
         if s == '<div class="actions">Traits</div>':
             return ''
+        s += '<div class="gradient"></div>'
+        return s
+
+    def get_bonus_action_blocks(self):
+        if isinstance(self.info['Bonus Actions'], float):
+            return ''
+        s = '<div class="actions">Bonus Actions</div>'
+        s += f"<div>{self.info['Bonus Actions']}</div>"
+        s += '<div class="gradient"></div>'
+        return s
+
+    def get_reaction_blocks(self):
+        if isinstance(self.info['Reactions'], float):
+            return ''
+        s = '<div class="actions">Reactions</div>'
+        s += f"<div>{self.info['Reactions']}</div>"
         s += '<div class="gradient"></div>'
         return s
 
@@ -423,20 +543,25 @@ class Token:
 
             <table>
                 <tr><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>
-                <tr><td>{self.info['Strength']:2.0f}</td><td>{self.info['Dexterity']:2.0f}</td><td>{self.info['Constitution']:2.0f}</td>
-                <td>{self.info['Intelligence']:2.0f}</td><td>{self.info['Wisdom']:2.0f}</td><td>{self.info['Charisma']:2.0f}</td></tr>
+                <tr><td>{self.info['Strength']:2.0f} (+{self.modifiers['strength_mod']})</td>
+                <td>{self.info['Dexterity']:2.0f} (+{self.modifiers['dexterity_mod']})</td>
+                <td>{self.info['Constitution']:2.0f} (+{self.modifiers['constitution_mod']})</td>
+                <td>{self.info['Intelligence']:2.0f} (+{self.modifiers['intelligence_mod']})</td>
+                <td>{self.info['Wisdom']:2.0f} (+{self.modifiers['wisdom_mod']})</td>
+                <td>{self.info['Charisma']:2.0f} (+{self.modifiers['charisma_mod']})</td></tr>
             </table>
             <div class="gradient"></div>
             
             {self.get_trait_blocks()}
+            {self.get_item_blocks()}
+            {self.get_weapon_blocks()}
 
             <div class="actions">Actions</div>
             <p>{self.info['Actions']}</p>
             <div class="gradient"></div>
             
-            {self.get_weapon_blocks()}
-            
-            {self.get_item_blocks()}
+            {self.get_bonus_action_blocks()}
+            {self.get_reaction_blocks()}
 
             </div>
             """
@@ -476,6 +601,14 @@ class ItemToken(Token):
 
         if "Mundane" in self.name:
             self.inventory = Inventory.preroll('mundane')
+        elif "Common Scroll" in self.name:
+            self.inventory = Inventory.preroll(rarity='common', item_type='scroll')
+        elif "Common Potion" in self.name:
+            self.inventory = Inventory.preroll(rarity='common', item_type='potion')
+        elif "Uncommon Scroll" in self.name:
+            self.inventory = Inventory.preroll(rarity='uncommon', item_type='scroll')
+        elif "Uncommon Potion" in self.name:
+            self.inventory = Inventory.preroll(rarity='uncommon', item_type='potion')
         elif "Common" in self.name:
             self.inventory = Inventory.preroll('common')
         elif "Uncommon" in self.name:
@@ -486,15 +619,14 @@ class ItemToken(Token):
 
     def token_block(self):
         return f"""
-        <div class="monster_block dark1 light" id="{self.id}"
+        <div class="monster_block item_token_block dark1 light" style="height: 30px;" id="{self.id}"
         onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
 
           <div>
-              <span class="token_name">{self.name}</span>
+              <span class="token_name">{self.inventory.items[0].name}</span>
               <span class="glyphicon glyphicon-trash al-right"></span>
           </div>
 
-          <div class="gradient"></div>
         </div>
         """
 
@@ -527,7 +659,8 @@ class Player(Token):
 
     def token_block(self):
         return f"""
-        <div class="monster_block dark1 light" onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
+        <div class="monster_block dark1 light"  id="{self.id}" 
+        onclick="load_token_stat_block('{self.encounter.id}', '{self.id}')">
           <div><span class="token_name">{self.name}</span>
           <span class="glyphicon glyphicon-trash al-right"></span></div>
           <div class="gradient"></div>
@@ -584,7 +717,8 @@ class Encounter:
                     tokens.append(Player(self, f'TOKEN {i + 1}'))
                 continue
 
-            if 'Item' in token['name'] or token['name'] == 'Lootable Container':
+            if 'Item' in token['name'] or token['name'] == 'Lootable Container' \
+                    or 'Scroll' in token['name'] or 'Potion' in token['name']:
                 for i in range(token['minion_count']):
                     tokens.append(ItemToken(self, f"{token['name']}"))
                 continue
@@ -682,13 +816,14 @@ class Inventory:
 
         self.token = token
         self.money = Money(token.life_style)
-        self.weapons = [Weapon.create_weapon_from_id(int(weapon)) for weapon in weapons]
+        self.weapons = []
+        # self.weapons = [Weapon.create_weapon_from_id(int(weapon)) for weapon in weapons]
         self.armor = []
         self.items = []
 
         self.generate_loot()
 
-    def generate_loot(self, item_rarity=None, item_spawn_chance=None):
+    def generate_loot(self, item_rarity=None, item_type=None, item_spawn_chance=None):
         if item_spawn_chance is None:
             item_spawn_chance = 0.20 if not self.token.boss else 1.00
 
@@ -703,7 +838,7 @@ class Inventory:
             if item_rarity is None:
                 item_rarity = np.random.choice(list(rarity_dict.keys()), p=list(rarity_dict.values()))
 
-            item = preroll_item(item_rarity)
+            item = preroll_item(item_rarity=item_rarity, item_type=item_type)
             item = Item(item['Name'], item['Type'], item_rarity, item['Value'], item['Weight'], item['Text'])
 
             # item = f"({item_rarity}) {item['Name']}"
@@ -716,7 +851,12 @@ class Inventory:
 
     def replace_item(self, old_item):
         item_rarity = old_item.rarity
-        item = preroll_item(item_rarity)
+        item_type = old_item.item_type
+        print("TYPE: ", item_type)
+        if item_type == 'scroll' or item_type == 'potion':
+            item = preroll_item(item_rarity, item_type)
+        else:
+            item = preroll_item(item_rarity)
         new_item = Item(item['Name'], item['Type'], item_rarity, item['Value'], item['Weight'], item['Text'])
 
         print("REPLACING ITEM: ", old_item, new_item)
@@ -724,16 +864,17 @@ class Inventory:
         self.items[index] = new_item
 
     @staticmethod
-    def preroll(rarity=None):
+    def preroll(rarity=None, item_type=None):
+        print("PREROLLING: ", rarity, item_type)
         tmp = Inventory()
-        tmp.generate_loot(item_rarity=rarity, item_spawn_chance=1.00)
+        tmp.generate_loot(item_rarity=rarity, item_type=item_type, item_spawn_chance=1.00)
         return tmp
 
     def loot_block(self):
         print(self.items)
 
         money = str(self.money)
-        weapons = ', '.join([str(w) for w in self.weapons])
+        weapons = ', '.join([str(w) for w in self.weapons if w.lootable])
         armor = ', '.join([str(w) for w in self.armor])
         items = ', '.join([w.name for w in self.items])
 

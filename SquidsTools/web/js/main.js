@@ -3,7 +3,7 @@ function replace_item(encounter_id, token_id, item_id) {
         eel.replace_item(encounter_id, token_id, item_id)().then(function (result) {
             refresh_stat_block();
             // refresh_encounter_list();
-            // refresh_encounter();
+            refresh_encounter();
         });
     }
 
@@ -96,7 +96,13 @@ function sendShopForm() {
     let n_uncommon = document.getElementById("num_uncommon").value;
     let n_common = document.getElementById("num_common").value;
     let n_mundane = document.getElementById("num_mundane").value;
-    eel.create_shop_inventory(n_mundane, n_common, n_uncommon)().then(function (result) {
+    let n_common_spells = document.getElementById("num_scommon").value;
+    let n_uncommon_spells = document.getElementById("num_suncommon").value;
+    let n_common_potions = document.getElementById("num_pcommon").value;
+    let n_uncommon_potions = document.getElementById("num_puncommon").value;
+
+    eel.create_shop_inventory(n_mundane, n_common, n_uncommon, n_common_spells,
+        n_uncommon_spells, n_common_potions, n_uncommon_potions)().then(function (result) {
         refresh_encounter_list()
         closeShopForm();
     });
@@ -145,7 +151,7 @@ function remove_entry() {
 }
 
 async function addSelection() {
-    let jsarr = $('.monster-selection').select2('data');
+    let jsarr = $('#builder-monster-selection').select2('data');
     await eel.add_monster_to_encounter_builder(jsarr)().then(function (result) {
         let html = result[0];
         let weapon_list = result[1];
@@ -166,7 +172,7 @@ async function addSelection() {
 }
 
 async function addTokenSelection() {
-    let jsarr = $('.monster-selection').select2('data');
+    let jsarr = $('#add-monster-selection').select2('data');
     await eel.add_monster_to_encounter_builder(jsarr)().then(function (result) {
         let html = result[0];
         let weapon_list = result[1];

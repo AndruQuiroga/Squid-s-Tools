@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div id="selected_encounter" class="selected_encounter dark">
+    <div id="selected_encounter" class="selected_encounter_container dark">
 
     </div>
 
@@ -74,6 +74,7 @@
 
     let selected_encounter_id = 0;
     let selected_token_id = 0;
+    let highlighted_token_id = 0;
 
     $(document).ready(function () {
 
@@ -89,7 +90,7 @@
             }
 
             let token_id = token_block.attr('id')
-            change_t_init(selected_encounter_id, token_id, null, -99)
+            // change_t_init(selected_encounter_id, token_id, null, -99)
             change_t_hp(selected_encounter_id, token_id, null, 0)
 
             // let token_name = token_block.find('.token_name').html()
@@ -156,7 +157,7 @@
 
     function refresh_encounter() {
         if (selected_encounter_id === 0) {
-            $('.selected_encounter').html("")
+            $('#selected_encounter').html("")
             return
         }
         load_encounter(selected_encounter_id);
@@ -168,9 +169,62 @@
 
     function load_encounter(encounter_id) {
         eel.load_encounter(encounter_id)().then(function (result) {
-            $('.selected_encounter').html(result)
+            $('#selected_encounter').html(result)
+            if (selected_encounter_id !== encounter_id) {
+                highlighted_token_id = get_first_token_id();
+            }
+
             selected_encounter_id = encounter_id;
+            highlight_token(highlighted_token_id)
+
         });
+    }
+
+    function get_first_token_id() {
+        let first_token = $('.monster_block').first()
+        return first_token.attr('id')
+    }
+
+    function rehighlight_token() {
+        highlight_token(highlighted_token_id)
+    }
+
+    function highlight_token(token_id) {
+        console.log("HIGHLIGHTING: " + token_id)
+        $('.monster_block').removeClass('highlighted')
+        $('.monster_block#' + token_id).addClass('highlighted')
+        highlighted_token_id = token_id;
+
+        // automatically scroll to highlighted token
+        let token_block = $('.monster_block#' + token_id)
+        // get the offset of the token from the top of the first token
+        let token_block_top = token_block.offset().top - $('.monster_block').first().offset().top;
+        // the scroll is coming up short for some reason for the later tokens
+
+
+        // scroll to token
+        $('.selected_encounter').animate({
+            scrollTop: token_block_top
+        }, 100);
+
+
+    }
+
+    function get_next_token_id() {
+        let next_token = $('.monster_block#' + highlighted_token_id).next()
+        // if the token is dead, skip it
+        while (next_token.hasClass('dead')) {
+            next_token = next_token.next()
+        }
+        // skip the token if it is an item_token_block
+        while (next_token.hasClass('item_token_block')) {
+            next_token = next_token.next()
+        }
+
+        if (next_token.length === 0) {
+            return get_first_token_id()
+        }
+        return next_token.attr('id')
     }
 
     function load_token_stat_block(encounter_id, token_id) {

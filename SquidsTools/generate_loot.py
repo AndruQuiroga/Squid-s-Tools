@@ -17,21 +17,22 @@ common_dict = {
 }
 
 uncommon_dict = {
-        '+1 Weapon': 0.30,
-        'Unique Weapon/Armor': 0.02,
-        'scroll': 0.22,
-        'potion': 0.26,
-        'other_magic': 0.17,
-        'other_mundane': 0.03,
-    }
+    '+1 Weapon': 0.30,
+    'Unique Weapon/Armor': 0.02,
+    'scroll': 0.22,
+    'potion': 0.26,
+    'other_magic': 0.17,
+    'other_mundane': 0.03,
+}
 
 
-def preroll_item(item_rarity):
+def preroll_item(item_rarity, item_type=None):
     """
     Generic common items (things found in chests or shops)
     :param num_items:
     :return:
     """
+
 
     if item_rarity == 'mundane':
         item = mundane_items.sample(1)
@@ -41,13 +42,15 @@ def preroll_item(item_rarity):
 
         common_items = ITEM_DATABASE[ITEM_DATABASE['Rarity'] == 'common']
         # types of common items to choose from are [scroll, potion, other]
-        item_type = np.random.choice(list(common_dict.keys()), p=list(common_dict.values()))
+        if item_type is None:
+            item_type = np.random.choice(list(common_dict.keys()), p=list(common_dict.values()))
+        print(item_type)
 
-        if item_type == 'Scroll':
+        if item_type == 'scroll':
             item = common_items[common_items['Type'] == 'scroll'].sample(1)
-        elif item_type == 'Potion':
+        elif item_type == 'potion':
             item = common_items[common_items['Type'] == 'potion'].sample(1)
-        elif item_type == 'Other_Magic':
+        elif item_type == 'other_magic':
             item = common_items[~common_items['Type'].str.contains('potion|scroll')].sample(1)
         else:
             item = common_mundane_items.sample(1)
@@ -57,17 +60,18 @@ def preroll_item(item_rarity):
     if item_rarity == 'uncommon':
 
         uncommon_items = ITEM_DATABASE[ITEM_DATABASE['Rarity'] == 'uncommon']
-        item_type = np.random.choice(list(uncommon_dict.keys()), p=list(uncommon_dict.values()))
+        if item_type is None:
+            item_type = np.random.choice(list(uncommon_dict.keys()), p=list(uncommon_dict.values()))
 
         if item_type == '+1 Weapon':
             item = uncommon_items[uncommon_items['Name'] == '+1 Weapon']
         elif item_type == 'Unique Weapon/Armor':
             item = uncommon_items[uncommon_items['Type'].str.contains('generic')].sample(1)
-        elif item_type == 'Scroll':
+        elif item_type == 'scroll':
             item = uncommon_items[uncommon_items['Type'] == 'scroll'].sample(1)
-        elif item_type == 'Potion':
+        elif item_type == 'potion':
             item = uncommon_items[uncommon_items['Type'] == 'potion'].sample(1)
-        elif item_type == 'Other_Magic':
+        elif item_type == 'other_magic':
             item = uncommon_items[~uncommon_items['Type'].str.contains('potion|scroll|generic')].sample(1)
         else:
             item = uncommon_mundane_items.sample(1)

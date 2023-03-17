@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='SquidsTools',
     include_package_data=True,
-    version='0.0.1',
+    version='0.0.2',
     packages=['SquidsTools'],
     package_data={
         # If any package contains *.txt or *.rst files, include them:
