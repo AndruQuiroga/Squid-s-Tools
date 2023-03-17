@@ -360,7 +360,8 @@ class Token:
                   'Saving Throws',
                   'Damage Vulnerabilities',
                   'Damage Resistances',
-                  'Condition Immunities']
+                  'Condition Immunities',
+                  'Traits']
         for trait in traits:
             if isinstance(self.info[trait], float):
                 continue
